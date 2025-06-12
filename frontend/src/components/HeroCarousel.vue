@@ -1,144 +1,164 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline'
+
+const slides = [
+  {
+    id: 1,
+    title: "Field Boundary Detection",
+    description: "Precision agriculture starts with accurate field mapping. Our AI-powered boundary detection creates digital twins of your fields with centimeter-level accuracy.",
+    bgImage: "bg-[url('@/assets/images/field-detection.webp')]",
+    cta: "Map Your Fields"
+  },
+  {
+    id: 2,
+    title: "Crop Classification",
+    description: "Automatically identify and classify crop types across your entire operation with our advanced computer vision models trained on millions of acres.",
+    bgImage: "bg-[url('@/assets/images/crop-classification.webp')]",
+    cta: "Classify Crops"
+  },
+  {
+    id: 3,
+    title: "Advanced Crop Monitoring",
+    description: "Real-time vegetation indices and growth stage tracking with satellite and drone imagery, alerting you to potential issues before they impact yield.",
+    bgImage: "bg-[url('@/assets/images/crop-monitoring.jpg')]",
+    cta: "Monitor Fields"
+  },
+  {
+    id: 4,
+    title: "Soil Moisture Analysis",
+    description: "Hyper-local soil moisture mapping combining satellite data, weather patterns, and ground sensors for optimal irrigation planning.",
+    bgImage: "bg-[url('@/assets/images/soil-analysis.jpg')]",
+    cta: "Analyze Soil"
+  },
+  {
+    id: 5,
+    title: "Yield Prediction",
+    description: "Accurate yield forecasts using machine learning models",
+    bgImage: "bg-[url('@/assets/images/yield-grid.jpg')]",
+    cta: "Predict Yield"
+  },
+  {
+    id: 6,
+    title: "Carbon Modeling",
+    description: "Measure and optimize your carbon footprint",
+    bgImage: "bg-[url('@/assets/images/carbon-grid(2).jpeg')]",
+    cta: "Model Carbon"
+  },
+  {
+    id: 7,
+    title: "Forest Monitoring",
+    description: "Track tree health and deforestation risks",
+    bgImage: "bg-[url('@/assets/images/forest-grid.jpeg')]",
+    cta: "Monitor Forest"
+  },
+  {
+    id: 8,
+    title: "Personalized Recommendations",
+    description: "AI-driven insights tailored to your operation",
+    bgImage: "bg-[url('@/assets/images/personalized-recommendation.jpeg')]",
+    cta: "Get Recommendations"
+  }
+]
+
+const currentSlide = ref(0)
+const interval = ref<any>()
+
+const nextSlide = () => {
+  currentSlide.value = (currentSlide.value + 1) % slides.length
+  resetInterval()
+}
+
+const prevSlide = () => {
+  currentSlide.value = (currentSlide.value - 1 + slides.length) % slides.length
+  resetInterval()
+}
+
+const goToSlide = (index: number) => {
+  currentSlide.value = index
+  resetInterval()
+}
+
+const resetInterval = () => {
+  clearInterval(interval.value)
+  startInterval()
+}
+
+const startInterval = () => {
+  interval.value = setInterval(() => {
+    nextSlide()
+  }, 7000)
+}
+
+onMounted(() => {
+  startInterval()
+  return () => clearInterval(interval.value)
+})
+</script>
+
 <template>
-  <section 
-    class="relative h-screen overflow-hidden"
-    @mouseenter="isAutoScrollPaused = true"
-    @mouseleave="isAutoScrollPaused = false"
-  >
-    <!-- Carousel Images -->
-    <div class="relative w-full h-full">
-      <div
-        v-for="(image, index) in carouselImages"
-        :key="index"
-        :class="['absolute inset-0 transition-opacity duration-1000', index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0']"
+  <div class="relative w-full overflow-hidden rounded-2xl shadow-xl h-[400px] sm:h-[500px] md:h-[600px]">
+    <!-- Slides -->
+    <div 
+      class="flex h-full transition-transform duration-1000 ease-in-out"
+      :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
+    >
+      <div 
+        v-for="(slide, index) in slides"
+        :key="slide.id"
+        class="relative flex-shrink-0 w-full h-full"
       >
-        <img 
-          :src="image.url" 
-          :alt="`${image.title} - Advanced agricultural satellite monitoring technology`" 
-          class="w-full h-full object-cover" 
-        />
-        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/40"></div>
-      </div>
-    </div>
-    <!-- Content Overlay -->
-    <div class="absolute inset-0 z-20 flex items-center justify-center">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div class="space-y-6 sm:space-y-8">
-          <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight animate-fade-in-up">
-            {{ carouselImages[currentSlide].title }}
-          </h1>
-          <p class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/90 font-medium max-w-4xl mx-auto animate-fade-in-up delay-200">
-            {{ carouselImages[currentSlide].subtitle }}
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center animate-fade-in-up delay-400">
-            <router-link to="/pricing">
-              <button 
-                class="bg-[hsl(var(--bright-yellow))] text-black px-6 sm:px-8 py-3 sm:py-4 rounded-full text-base sm:text-lg font-bold hover:scale-105 hover:shadow-xl transition-all duration-300 animate-glow w-full sm:w-auto"
-              >
-                {{ carouselImages[currentSlide].cta }}
-              </button>
-            </router-link>
-            <button class="text-white text-base sm:text-lg font-semibold hover:text-[hsl(var(--bright-yellow))] transition-colors duration-200 relative group w-full sm:w-auto">
-              <span class="inline mr-2">▶</span>
-              Watch Demo
-              <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-[hsl(var(--bright-yellow))] transition-all duration-300 group-hover:w-full"></span>
+        <!-- Background Image with Overlay -->
+        <div 
+          class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+          :class="[slide.bgImage, currentSlide === index ? 'opacity-100' : 'opacity-0']"
+        >
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
+        </div>
+        <!-- Content -->
+        <div class="relative h-full flex flex-col justify-center items-center px-4 sm:px-8 text-white">
+          <div 
+            class="w-full max-w-xl space-y-4 sm:space-y-6 transform transition-all duration-1000 text-center"
+            :class="currentSlide === index ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
+          >
+            <h2 class="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
+              {{ slide.title }}
+            </h2>
+            <p class="text-base xs:text-lg sm:text-xl md:text-2xl leading-relaxed">
+              {{ slide.description }}
+            </p>
+            <button class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white/20 backdrop-blur-md rounded-full border border-white/30 hover:bg-emerald-600/80 hover:border-emerald-600 transition-all duration-300 font-medium">
+              {{ slide.cta }}
             </button>
           </div>
         </div>
       </div>
     </div>
-    <!-- Navigation Controls -->
-    <button
+    <!-- Controls -->
+    <button 
       @click="prevSlide"
-      class="absolute left-4 sm:left-8 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 backdrop-blur-sm rounded-full p-2 sm:p-3 text-white hover:bg-white/30 hover:scale-110 transition-all duration-300"
+      class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 p-2 sm:p-3 mt-4 rounded-full bg-white/20 backdrop-blur-md hover:bg-emerald-600/80 transition-colors duration-200"
+      aria-label="Previous slide"
     >
-      <span class="h-5 w-5 sm:h-6 sm:w-6">&#8592;</span>
+      <ChevronLeftIcon class="h-5 w-5 sm:h-6 sm:w-6 text-white" />
     </button>
-    <button
+    <button 
       @click="nextSlide"
-      class="absolute right-4 sm:right-8 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 backdrop-blur-sm rounded-full p-2 sm:p-3 text-white hover:bg-white/30 hover:scale-110 transition-all duration-300"
+      class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/20 backdrop-blur-md hover:bg-emerald-600/80 transition-colors duration-200"
+      aria-label="Next slide"
     >
-      <span class="h-5 w-5 sm:h-6 sm:w-6">&#8594;</span>
+      <ChevronRightIcon class="h-5 w-5 sm:h-6 sm:w-6 text-white" />
     </button>
-    <!-- Dots Indicator -->
-    <div class="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex space-x-2 sm:space-x-3">
+    <!-- Indicators -->
+    <div class="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex space-x-2">
       <button
-        v-for="(_, index) in carouselImages"
-        :key="index"
+        v-for="(slide, index) in slides"
+        :key="slide.id"
         @click="goToSlide(index)"
-        :class="['w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300', index === currentSlide ? 'bg-[hsl(var(--bright-yellow))] scale-125' : 'bg-white/50 hover:bg-white/70']"
+        class="h-2 w-6 sm:h-3 sm:w-8 rounded-full transition-all duration-300"
+        :class="currentSlide === index ? 'bg-emerald-400' : 'bg-white/50 hover:bg-white/80'"
+        aria-label="Go to slide"
       />
     </div>
-  </section>
+  </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-const carouselImages = [
-  {
-    url: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3&auto=format&fit=crop&w=3840&h=2160',
-    title: 'Transform Agriculture with Satellite Intelligence',
-    subtitle: 'Precision farming powered by Sentinel satellite data and AI technology',
-    cta: 'Discover EcoSystem+'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-4.0.3&auto=format&fit=crop&w=3840&h=2160',
-    title: 'Crop Classification Technology',
-    subtitle: 'Identify crop types with precision using multispectral satellite imagery',
-    cta: 'Explore Classification'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1546026423-cc4642628d2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=3840&h=2160',
-    title: 'Real-Time Crop Monitoring',
-    subtitle: 'Track crop health with NDVI analysis and stress detection',
-    cta: 'Monitor Crops'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?ixlib=rb-4.0.3&auto=format&fit=crop&w=3840&h=2160',
-    title: 'Carbon Modeling & Sequestration',
-    subtitle: 'Measure carbon storage and environmental impact with precision',
-    cta: 'Carbon Insights'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?ixlib=rb-4.0.3&auto=format&fit=crop&w=3840&h=2160',
-    title: 'Predict Future Yields',
-    subtitle: 'Machine learning models for accurate harvest forecasting',
-    cta: 'View Predictions'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=3840&h=2160',
-    title: 'Monitor Forest Conservation',
-    subtitle: 'Detect deforestation and track environmental changes',
-    cta: 'Forest Insights'
-  }
-]
-const currentSlide = ref(0)
-const isAutoScrollPaused = ref(false)
-let intervalId: number | undefined
-
-const nextSlide = () => {
-  currentSlide.value = (currentSlide.value + 1) % carouselImages.length
-}
-const prevSlide = () => {
-  currentSlide.value = (currentSlide.value - 1 + carouselImages.length) % carouselImages.length
-}
-const goToSlide = (index: number) => {
-  currentSlide.value = index
-}
-onMounted(() => {
-  intervalId = window.setInterval(() => {
-    if (!isAutoScrollPaused.value) {
-      nextSlide()
-    }
-  }, 8000)
-})
-onUnmounted(() => {
-  if (intervalId) clearInterval(intervalId)
-})
-watch(isAutoScrollPaused, (paused) => {
-  // Optionally handle pause/resume logic
-})
-</script>
-
-<style scoped>
-/* Add your styles here or use Tailwind CSS as in the original */
-</style>
