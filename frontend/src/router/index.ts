@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
+import CropMonitoring from '../views/crop-monitoring.vue' 
+import SoilMoisture from '../views/soil-moisture.vue' 
+import CropClassification from '../views/crop-classification1.vue' 
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,6 +12,21 @@ const router = createRouter({
       name: 'home',
       component: Home,
     },
+    {
+      path: '/monitoring',
+      name: 'crop-monitoring',
+      component: CropMonitoring
+    },
+    {
+      path: '/soil-moisture',
+      name: 'soil-moisture',
+      component: SoilMoisture
+    },
+    {
+      path: '/classification',
+      name: 'crop-classification',
+      component: CropClassification
+    }
   ],
 })
 
