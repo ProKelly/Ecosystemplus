@@ -4,6 +4,9 @@ import CropMonitoring from '../views/crop-monitoring.vue'
 import SoilMoisture from '../views/soil-moisture.vue' 
 import CropClassification from '../views/crop-classification1.vue' 
 import FieldBoundaryDetection from '@/components/field-boundary/FieldBoundaryDetection.vue'
+import PersonalizedRecommendations from '@/components/personalized-recommendations/Bot.vue'
+import Bot from '@/components/personalized-recommendations/Bot.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +35,11 @@ const router = createRouter({
       path: '/field-detection',
       name: 'FieldBoundaryDetection',
       component: FieldBoundaryDetection
+    },
+    {
+      path: '/personalized-recommendations',
+      name: 'personalized-recommendations',
+      component: Bot
     }
   ],
 })

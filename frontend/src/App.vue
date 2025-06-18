@@ -83,13 +83,13 @@ const mobileMenuOpen = ref(false)
             >
               {{ link.name }}
             </RouterLink>
-            <RouterLink 
-              to="/dashboard" 
+            <!-- <RouterLink 
+              to="/personalized-recommendations" 
               @click="mobileMenuOpen = false"
               class="block mt-4 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-lg font-bold rounded-xl text-center shadow-md hover:scale-105 transition-transform duration-150"
             >
-              My Dashboard
-            </RouterLink>
+              Home
+            </RouterLink> -->
           </div>
         </transition>
       </nav>
@@ -98,6 +98,33 @@ const mobileMenuOpen = ref(false)
     <!-- Main Content -->
     <main>
       <RouterView />
+
+      <!-- Floating Chatbot Button -->
+      <button
+        type="button"
+        @click="$router.push('/personalized-recommendations')"
+        class="fixed z-50 bottom-6 right-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg flex items-center justify-center w-16 h-16 transition-colors border-4 border-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
+        aria-label="Open Chatbot"
+      >
+        <!-- prbot.svg icon -->
+        <svg fill="#fff" height="40" width="40" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <g id="assistant">
+            <g>
+              <path d="M9,12.5H8c-0.6,0-1-0.4-1-1v-1c0-0.6,0.4-1,1-1h1c0.6,0,1,0.4,1,1v1C10,12.1,9.6,12.5,9,12.5z"/>
+            </g>
+            <g>
+              <path d="M16,12.5h-1c-0.6,0-1-0.4-1-1v-1c0-0.6,0.4-1,1-1h1c0.6,0,1,0.4,1,1v1C17,12.1,16.6,12.5,16,12.5z"/>
+            </g>
+            <path d="M12,0c1.1,0,2,0.9,2,2s-0.9,2-2,2s-2-0.9-2-2S10.9,0,12,0z"/>
+            <g>
+              <path d="M12,24c-2.7,0-4.9-1.6-5-4.2c-1.1-0.3-2.3-0.8-3.5-1.4L3,18.1v-4.6c0-4.6,3.5-8.4,8-8.9V1.5h2v3.1c4.5,0.5,8,4.3,8,8.9
+                v4.6l-0.5,0.3c-0.9,0.5-2.1,1-3.5,1.4C16.9,22.4,14.7,24,12,24z M9.1,20.2C9.5,21.5,10.6,22,12,22s2.6-0.5,2.9-1.8
+                C13.3,20.5,11.6,20.6,9.1,20.2z M5,16.9c2.7,1.3,5.3,1.6,7,1.6c3,0,5.4-0.8,7-1.6v-1.5c-1.8,0.9-4.5,1.1-7,1.1s-5.2-0.2-7-1.1
+                V16.9z M5.1,12.8c0.1,0.7,2.2,1.7,7,1.7c4.3,0,6.9-0.9,7-1.7c-0.3-3.5-3.3-6.3-7-6.3S5.4,9.3,5.1,12.8z"/>
+            </g>
+          </g>
+        </svg>
+      </button>
     </main>
 
     <!-- Footer -->
