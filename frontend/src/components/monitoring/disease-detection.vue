@@ -17,7 +17,7 @@
       <div v-if="showTutorial" class="mb-10 flex justify-center bg-green-50 rounded-border">
         <div class="w-full max-w-3xl">
           <video controls class="w-full rounded shadow block mb-2">
-            <source src="@/assets/video/monitoring-tutorial.mp4" type="video/mp4" />
+            <!-- <source src="@/assets/video/monitoring-tutorial.mp4" type="video/mp4" /> -->
             Your browser does not support the video tag.
           </video>
           <p class="text-center text-sm text-gray-600 mb-6">

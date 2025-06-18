@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import CropMonitoring from '../views/crop-monitoring.vue' 
 import SoilMoisture from '../views/soil-moisture.vue' 
 import CropClassification from '../views/crop-classification1.vue' 
+import FieldBoundaryDetection from '@/components/field-boundary/FieldBoundaryDetection.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,11 @@ const router = createRouter({
       path: '/classification',
       name: 'crop-classification',
       component: CropClassification
+    },
+    {
+      path: '/field-detection',
+      name: 'FieldBoundaryDetection',
+      component: FieldBoundaryDetection
     }
   ],
 })
