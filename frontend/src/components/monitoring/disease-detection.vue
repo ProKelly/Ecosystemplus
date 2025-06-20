@@ -16,10 +16,10 @@
     <transition name="slide-fade">
       <div v-if="showTutorial" class="mb-10 flex justify-center bg-green-50 rounded-border">
         <div class="w-full max-w-3xl">
-          <video controls class="w-full rounded shadow block mb-2">
-            <!-- <source src="@/assets/video/monitoring-tutorial.mp4" type="video/mp4" /> -->
+          <!-- <video controls class="w-full rounded shadow block mb-2">
+            <source src="@/assets/video/monitoring-tutorial.mp4" type="video/mp4" />
             Your browser does not support the video tag.
-          </video>
+          </video> -->
           <p class="text-center text-sm text-gray-600 mb-6">
             Watch this short tutorial to learn how to snap accurate crop images for detection.
           </p>

@@ -189,8 +189,9 @@ import { ref, computed, onMounted, watch } from 'vue'
 import LineChart from '@/components/LineChart.vue'
 
 // Constants
-const LAT = 6.5
-const LON = 11.5
+// const LAT = 6.5
+const LAT = 5.878332109674327
+const LON = 11.843261718750002
 
 // State
 const viewType = ref('')
