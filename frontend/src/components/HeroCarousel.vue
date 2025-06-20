@@ -8,56 +8,64 @@ const slides = [
     title: "Field Boundary Detection",
     description: "Precision agriculture starts with accurate field mapping. Our AI-powered boundary detection creates digital twins of your fields with centimeter-level accuracy.",
     bgImage: "bg-[url('@/assets/images/field-detection.webp')]",
-    cta: "Map Your Fields"
+    cta: "Map Your Fields",
+    route: "/field-detection"
   },
   {
     id: 2,
     title: "Crop Classification",
     description: "Automatically identify and classify crop types across your entire operation with our advanced computer vision models trained on millions of acres.",
     bgImage: "bg-[url('@/assets/images/crop-classification.webp')]",
-    cta: "Classify Crops"
+    cta: "Classify Crops",
+    route: "/classification"
   },
   {
     id: 3,
     title: "Advanced Crop Monitoring",
     description: "Real-time vegetation indices and growth stage tracking with satellite and drone imagery, alerting you to potential issues before they impact yield.",
     bgImage: "bg-[url('@/assets/images/crop-monitoring.jpg')]",
-    cta: "Monitor Fields"
+    cta: "Monitor Fields",
+    route: "/monitoring"
   },
   {
     id: 4,
     title: "Soil Moisture Analysis",
     description: "Hyper-local soil moisture mapping combining satellite data, weather patterns, and ground sensors for optimal irrigation planning.",
     bgImage: "bg-[url('@/assets/images/soil-analysis.jpg')]",
-    cta: "Analyze Soil"
+    cta: "Analyze Soil",
+    route: "/soil-moisture"
   },
   {
     id: 5,
     title: "Yield Prediction",
     description: "Accurate yield forecasts using machine learning models",
     bgImage: "bg-[url('@/assets/images/yield-grid.jpg')]",
-    cta: "Predict Yield"
+    cta: "Predict Yield",
+    route: "/monitoring" // fallback or create a new route if needed
   },
   {
     id: 6,
     title: "Carbon Modeling",
     description: "Measure and optimize your carbon footprint",
     bgImage: "bg-[url('@/assets/images/carbon-grid(2).jpeg')]",
-    cta: "Model Carbon"
+    cta: "Model Carbon",
+    route: "/monitoring" // fallback or create a new route if needed
   },
   {
     id: 7,
     title: "Forest Monitoring",
     description: "Track tree health and deforestation risks",
     bgImage: "bg-[url('@/assets/images/forest-grid.jpeg')]",
-    cta: "Monitor Forest"
+    cta: "Monitor Forest",
+    route: "/forest-monitoring"
   },
   {
     id: 8,
     title: "Personalized Recommendations",
     description: "AI-driven insights tailored to your operation",
     bgImage: "bg-[url('@/assets/images/personalized-recommendation.jpeg')]",
-    cta: "Get Recommendations"
+    cta: "Get Recommendations",
+    route: "/personalized-recommendations"
   }
 ]
 
@@ -127,9 +135,12 @@ onMounted(() => {
             <p class="text-base xs:text-lg sm:text-xl md:text-2xl leading-relaxed">
               {{ slide.description }}
             </p>
-            <button class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white/20 backdrop-blur-md rounded-full border border-white/30 hover:bg-emerald-600/80 hover:border-emerald-600 transition-all duration-300 font-medium">
+            <router-link
+              :to="slide.route"
+              class="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white/20 backdrop-blur-md rounded-full border border-white/30 hover:bg-emerald-600/80 hover:border-emerald-600 transition-all duration-300 font-medium inline-block"
+            >
               {{ slide.cta }}
-            </button>
+            </router-link>
           </div>
         </div>
       </div>

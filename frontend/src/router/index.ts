@@ -6,6 +6,8 @@ import CropClassification from '../views/crop-classification1.vue'
 import FieldBoundaryDetection from '@/components/field-boundary/FieldBoundaryDetection.vue'
 import PersonalizedRecommendations from '@/components/personalized-recommendations/Bot.vue'
 import Bot from '@/components/personalized-recommendations/Bot.vue'
+import ForestMonitor from '../views/ForestMonitor.vue'
+import ForestRegister from '../views/ForestRegister.vue'
 
 
 const router = createRouter({
@@ -21,6 +23,16 @@ const router = createRouter({
       name: 'crop-monitoring',
       component: CropMonitoring
     },
+    {
+    path: '/forest-monitoring',
+    name: 'forest-monitoring',
+    component: ForestMonitor
+  },
+  {
+    path: '/register-forest',
+    name: 'register-forest',
+    component: ForestRegister
+  },
     {
       path: '/soil-moisture',
       name: 'soil-moisture',

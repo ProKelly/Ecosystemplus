@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import HeroCarousel from '@/components/HeroCarousel.vue'
 import ModuleGrid from '@/components/ModuleGrid.vue'
+import ModuleImpactCarousel from '@/components/ModuleImpactCarousel.vue'
 </script>
 
 <template class="w-full">
@@ -54,53 +55,12 @@ import ModuleGrid from '@/components/ModuleGrid.vue'
       </section>
 
       <!-- Redesigned Testimonial Section -->
-      <section class="max-w-5xl mx-auto px-6 mt-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Testimonial 1 -->
-          <div class="relative bg-white rounded-2xl shadow-xl p-8 md:p-10 flex flex-col items-center text-center overflow-hidden border border-gray-100 transition-transform duration-300 hover:scale-[1.025] hover:shadow-2xl">
-            <div class="absolute -top-8 left-1/2 -translate-x-1/2">
-              <div class="bg-emerald-100 rounded-full p-2 shadow-md">
-                <svg class="h-10 w-10 text-amber-400" fill="currentColor" viewBox="0 0 32 32">
-                  <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
-                </svg>
-              </div>
-            </div>
-            <div class="mt-8">
-              <blockquote class="text-2xl md:text-2xl font-semibold text-gray-800 leading-relaxed max-w-xl mx-auto italic">
-                “EcoSystem+ transformed our 5,000-acre operation. The yield prediction module alone increased our productivity by 22% in the first season.”
-              </blockquote>
-            </div>
-            <div class="flex flex-col items-center mt-8">
-              <img src="https://randomuser.me/api/portraits/women/89.jpg" alt="Sarah Johnson" class="w-16 h-16 rounded-full border-4 border-emerald-200 shadow-md mb-2">
-              <p class="text-lg font-bold text-gray-900">Sarah Johnson</p>
-              <p class="text-gray-500 text-sm">Farm Director, Green Valley Agribusiness</p>
-            </div>
-          </div>
-          <!-- Testimonial 2 -->
-          <div class="relative bg-white rounded-2xl shadow-xl p-8 md:p-10 flex flex-col items-center text-center overflow-hidden border border-gray-100 transition-transform duration-300 hover:scale-[1.025] hover:shadow-2xl">
-            <div class="absolute -top-8 left-1/2 -translate-x-1/2">
-              <div class="bg-emerald-100 rounded-full p-2 shadow-md">
-                <svg class="h-10 w-10 text-amber-400" fill="currentColor" viewBox="0 0 32 32">
-                  <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
-                </svg>
-              </div>
-            </div>
-            <div class="mt-8">
-              <blockquote class="text-2xl md:text-2xl font-semibold text-gray-800 leading-relaxed max-w-xl mx-auto italic">
-                “With EcoSystem+, our soil analysis and crop monitoring are now seamless. The insights are actionable and the support team is fantastic!”
-              </blockquote>
-            </div>
-            <div class="flex flex-col items-center mt-8">
-              <img src="https://randomuser.me/api/portraits/men/59.jpg" alt="James Lee" class="w-16 h-16 rounded-full border-4 border-emerald-200 shadow-md mb-2">
-              <p class="text-lg font-bold text-gray-900">James Lee</p>
-              <p class="text-gray-500 text-sm">Operations Manager, Sunrise Farms</p>
-            </div>
-          </div>
-        </div>
+      <section class="max-w-full mx-auto px-6 mt-16">
+        <ModuleImpactCarousel />
       </section>
 
       <!-- CTA Section -->
-      <section class="max-w-7xl mx-auto px-6 flex flex-col items-center justify-center">
+      <!-- <section class="max-w-7xl mx-auto px-6 flex flex-col items-center justify-center">
         <div class="relative bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 md:p-12 text-white overflow-hidden w-full flex flex-col items-center justify-center">
           <div class="absolute inset-0 opacity-10">
             <div class="absolute inset-0 bg-[url('@/assets/pattern.svg')] bg-repeat"></div>
@@ -122,7 +82,7 @@ import ModuleGrid from '@/components/ModuleGrid.vue'
             </div>
           </div>
         </div>
-      </section>
+      </section> -->
     </div>
   </div>
 </template>
