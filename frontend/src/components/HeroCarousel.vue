@@ -47,7 +47,7 @@ const slides = [
     id: 6,
     title: "Carbon Modeling",
     description: "Measure and optimize your carbon footprint",
-    bgImage: "bg-[url('@/assets/images/carbon-grid(2).jpeg')]",
+    bgImage: "bg-[url('@/assets/images/carbon-grid-2.jpeg')]",
     cta: "Model Carbon",
     route: "/monitoring" // fallback or create a new route if needed
   },

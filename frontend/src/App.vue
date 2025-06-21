@@ -33,7 +33,7 @@ const mobileMenuOpen = ref(false)
                 <RouterLink to="/classification" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Crop Classification</RouterLink>
                 <RouterLink to="/monitoring" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Crop Monitoring</RouterLink>
                 <RouterLink to="/forest-monitoring" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Forest Monitoring</RouterLink>
-                <RouterLink to="/soil-analysis" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Soil Analysis</RouterLink>
+                <RouterLink to="/soil-moisture" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Soil Analysis</RouterLink>
                 <RouterLink to="/yield-prediction" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Yield Prediction</RouterLink>
                 <RouterLink to="/carbon-model" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Carbon Model</RouterLink>
                 <RouterLink to="/personalized-recommendations" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">A.I Recommendations</RouterLink>
