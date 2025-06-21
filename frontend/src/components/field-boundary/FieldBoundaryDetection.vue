@@ -2,13 +2,6 @@
 import { ref, onMounted, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet-draw'
-// Removed: import { MapboxLayer } from '@deck.gl/leaflet'
-// import { GeoJsonLayer } from '@deck.gl/layers'
-import MapViewer from '@/components/MapViewer.vue'
-import ProcessingStatus from '@/components/field-boundary/ProcessingStatus.vue'
-import BoundaryHistory from '@/components/field-boundary/BoundaryHistory.vue'
-import AccuracyMeter from '@/components/field-boundary/AccuracyMeter.vue'
-import TutorialOverlay from '@/components/field-boundary/TutorialOverlay.vue'
 
 // State management
 const mapLoaded = ref(false)
