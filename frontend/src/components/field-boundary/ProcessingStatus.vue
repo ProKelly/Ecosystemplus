@@ -1,6 +1,19 @@
-<<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { PropType } from 'vue'
+import type * as LType from 'leaflet';
+
+declare global {
+  type Field = {
+    id: number;
+    name: string;
+    area: string;
+    coordinates: any[];
+    date: string;
+    accuracy: string;
+    problems: { type: string; location: number[] }[];
+  };
+}
 
 const props = defineProps({
   history: {
@@ -87,4 +100,4 @@ const progressText = computed(() => {
 .bg-white {
   animation: pulse 2s ease-in-out infinite;
 }
-</style>>
+</style>

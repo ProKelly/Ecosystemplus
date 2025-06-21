@@ -278,7 +278,7 @@ const changeBaseLayer = (layer: 'satellite' | 'ndvi' | 'terrain') => {
   showLayerDropdown.value = false
   if (map) {
     // Remove all tile layers (but not overlays)
-    map.eachLayer(l => {
+    map.eachLayer((l: any) => {
       if (l instanceof L.TileLayer && l !== drawnItems && l !== drawControl) {
         map.removeLayer(l)
       }
@@ -567,7 +567,7 @@ if (typeof window !== 'undefined') {
                 <button
                   @click="toggleFullScreen"
                   class="px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 flex items-center"
-                  :aria-pressed="isFullScreen.toString()"
+                  :aria-pressed="isFullScreen ? 'true' : 'false'"
                   title="Toggle Fullscreen"
                 >
                   <svg v-if="!isFullScreen" class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
