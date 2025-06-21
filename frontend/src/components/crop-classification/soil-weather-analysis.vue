@@ -20,7 +20,7 @@ const registeredField = ref({
     [2.6, 7.8],
     [2.5, 7.7],
     [2.4, 7.9],
-  ],
+  ] as [number, number][],
   surfaceArea: '5.2 ha',
   timestamp: '2025-06-16T10:00:00Z',
 })

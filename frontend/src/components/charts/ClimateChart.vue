@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, onUnmounted } from 'vue'
 import { Chart, registerables } from 'chart.js'
+import type { ChartConfiguration, ChartType } from 'chart.js'
 
 Chart.register(...registerables)
 
 const props = defineProps<{
   data: number[]
   label: string
-  type: string
+  type: ChartType
 }>()
 
 const chartCanvas = ref<HTMLCanvasElement | null>(null)
@@ -15,7 +16,7 @@ let chart: Chart | null = null
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-const getChartConfig = () => {
+const getChartConfig = (): ChartConfiguration => {
   const colors = {
     temperature: '#ef4444',
     humidity: '#3b82f6',
@@ -31,7 +32,7 @@ const getChartConfig = () => {
   }
 
   return {
-    type: 'line',
+    type: props.type,
     data: {
       labels: months,
       datasets: [
@@ -67,7 +68,7 @@ const getChartConfig = () => {
         },
       },
     },
-  }
+  } as Chart.ChartConfiguration
 }
 
 onMounted(() => {
