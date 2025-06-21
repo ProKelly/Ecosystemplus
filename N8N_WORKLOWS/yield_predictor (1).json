@@ -1,0 +1,695 @@
+{
+  "name": "yield predictor",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://nominatim.openstreetmap.org/search?q={{ $json.Commune }},+Cameroon&format=json&limit=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "tabodjoshua@gmail.com"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1460,
+        140
+      ],
+      "id": "657d765e-c69d-485d-874d-21cf08ea2b5f",
+      "name": "GET COORDINATES HTTP Request",
+      "retryOnFail": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "363c2d1e-7c95-41eb-ab8a-3134a8dbd7a4",
+              "name": "=Crop_Type",
+              "value": "={{ $json.body.crop_type }}",
+              "type": "string"
+            },
+            {
+              "id": "34849066-58de-4a90-8dbf-5fcfdad3f26f",
+              "name": "Commune",
+              "value": "={{ $json.body.town }}",
+              "type": "string"
+            },
+            {
+              "id": "8c22aa7a-4f0b-4f2e-8023-dd1573d1035e",
+              "name": "farm_size",
+              "value": "={{ $json.body.farm_size }}",
+              "type": "string"
+            },
+            {
+              "id": "c92aad1c-cdaf-489b-aaed-f87628aa6eef",
+              "name": "Contact",
+              "value": "={{ $json.body.contact }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2640,
+        20
+      ],
+      "id": "a878cf24-bd73-4896-ba9b-2dc055f17a6b",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.tomorrow.io/v4/weather/forecast?location={{ $json.lat }},{{ $json.lon }}&apikey=JVararbrSl28Xi3ssgX3ws8fZqo7vd3V",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "timesteps",
+              "value": "1d"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1200,
+        40
+      ],
+      "id": "d1b488a6-3649-4a4d-a348-77b4a93c30f4",
+      "name": "GET WEATHER DATA1"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=5.95&longitude=10.15&hourly=soil_moisture_0_to_10cm,soil_moisture_10_to_40cm,soil_moisture_40_to_100cm,soil_moisture_100_to_200cm,soil_temperature_0_to_10cm,soil_temperature_10_to_40cm,soil_temperature_40_to_100cm,soil_temperature_100_to_200cm&forecast_days=1&timezone=auto",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "lat",
+              "value": "={{ $json.location.lat }}"
+            },
+            {
+              "name": "lon",
+              "value": "={{ $json.location.lon }}"
+            },
+            {
+              "name": "hourly",
+              "value": "soil_moisture_0_to_10cm,soil_moisture_10_to_40cm,soil_moisture_40_to_100cm,soil_moisture_100_to_200cm,soil_temperature_0_to_10cm,soil_temperature_10_to_40cm,soil_temperature_40_to_100cm,soil_temperature_100_to_200cm"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -820,
+        80
+      ],
+      "id": "3451ccd4-742a-4a88-89ae-4b597624305c",
+      "name": "GET SOIL DATA1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const hourly = $json.hourly;\n\nfunction average(arr) {\n  const sum = arr.reduce((a, b) => a + b, 0);\n  return parseFloat((sum / arr.length).toFixed(2));\n}\n\nconst soil_data_summary = {\n  \"Soil Temperature (0-10cm)\": average(hourly.soil_temperature_0_to_10cm),\n  \"Soil Temperature (10-40cm)\": average(hourly.soil_temperature_10_to_40cm),\n  \"Soil Temperature (40-100cm)\": average(hourly.soil_temperature_40_to_100cm),\n  \"Soil Temperature (100-200cm)\": average(hourly.soil_temperature_100_to_200cm)\n};\nreturn [\n  {\n    json: {\n      soil_data_summary\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -540,
+        200
+      ],
+      "id": "7002c84e-66b1-4961-9695-52189350f665",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "predict_yield",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -2860,
+        20
+      ],
+      "id": "e895f13f-2719-4188-99c7-ebbeb1f9fbf4",
+      "name": "Webhook",
+      "webhookId": "51b6d512-0320-4901-ad17-220cfba7261a"
+    },
+    {
+      "parameters": {
+        "content": "# Front-end Request#\n\n*Webhook – /predict_yield\n*Trigger node\n*Expects crop_type, commune, farm_size, contact\n*Set – normalise input\n*Trims whitespace, lower-cases and snake-cases strings\n*Adds timestamp",
+        "height": 760,
+        "width": 820,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2940,
+        -240
+      ],
+      "id": "75477048-c167-43a1-b736-3f86538298a6",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Agro-Environmental enrichment #\n## GET COORDINATES ##\nFinds lat,lon for the commune through MapBox → OpenCage → Nominatim fall-backs.\n## GET WEATHER DATA ##\nCalls Tomorrow.io; needs TOMORROW_IO_API_KEY.\nRetrieves 30-day history + 7-day forecast.\n## GET SOIL DATA ##\nPulls SoilGrids (pH, SOC, bulk density). No key required.\n## CROP CONDITIONS ##\nUses llm to get each crop’s optimal ranges + HS-6 code + baseline yields.\n##REGION CONDITIONS##\nMerges coordinates + weather + soil + constants into one item.\n** Function ** – Risk Classification\nJS compares current conditions vs. optimal ranges.\nCalculates predicted_yield_per_ha, predicted_yield_total, confidence_percent, factors[], recommendations[].",
+        "height": 1800,
+        "width": 1740,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1620,
+        -640
+      ],
+      "id": "5ffdda2b-b138-4210-8859-55b28178c877",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# Response packaging #\n* Set * – select fields\n* Strips raw weather / soil blobs; keeps only what UI & e-mail need.\n* Function – add prediction_id\n* Ensures every run has a prediction_id (uses pred_<timestamp> if backend skipped it).\n* Respond to Webhook\n* Sends 200 + JSON back to Vue front-end.",
+        "height": 1220,
+        "width": 1820,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -300
+      ],
+      "id": "899b20c2-3ddb-4c56-9535-97be44a31ecc",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -600,
+        -300
+      ],
+      "id": "be0dcbe3-3fa1-4306-bd94-6fa6e36a12d7",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5-coder:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -1380,
+        800
+      ],
+      "id": "7c6bf0a6-3590-4a80-96ac-8d1624e5d1f9",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "zwfmBX7DpH9Kol5V",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"crop\": \"cassava\",\n  \"commune\": \"abongmbang\",\n  \"base_yield_tons_per_ha\": 25,\n  \"average_unit_weight_kg\": 1.5,\n  \"average_units_per_ha\": 16666,\n  \"optimal_conditions\": {\n    \"temperature_range_c\": [25, 29],\n    \"annual_rainfall_mm\": [1000, 1500],\n    \"soil_temperature_range_c\": [24, 28],\n    \"soil_pH_range\": [5.5, 6.5],\n    \"humidity_range_percent\": [60, 80],\n    \"sunlight_hours_per_day\": [6, 8],\n    \"soil_type\": \"well-drained, sandy loam\"\n  }\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -1220,
+        800
+      ],
+      "id": "786c9855-0ddc-4484-89d4-0c1743ace5a7",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "tableId": "YIELD_PREDICTION_TABLE",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "Crop_Type",
+              "fieldValue": "={{ $('Code2').item.json.crop_type }}"
+            },
+            {
+              "fieldId": "City",
+              "fieldValue": "={{ $('Code2').item.json.commune }}"
+            },
+            {
+              "fieldId": "Farm_Size (ha)",
+              "fieldValue": "={{ $('Code2').item.json.farm_size }}"
+            },
+            {
+              "fieldId": "Predicted_yield (kg/ha))",
+              "fieldValue": "={{ $('Code2').item.json.predicted_yield_per_ha }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3840,
+        880
+      ],
+      "id": "b1a32a71-e88c-4589-bbad-d25d84809bad",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2cfc868knHuFoXWU",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.3,
+      "position": [
+        1780,
+        -220
+      ],
+      "id": "c8f0cecb-e38a-42c1-9e63-6452fd24276e",
+      "name": "Respond to Webhook1",
+      "retryOnFail": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "/****************************************************************\n*  Yield Predictor (v1.2 – tolerant key search)                 *\n*  Accepts the FOUR blocks you already merge in n8n:            *\n*    1) Request  { Crop_Type, Commune, farm_size, Contact }     *\n*    2) Weather  { timelines:{daily:[…]} }                      *\n*    3) Soil     { soil_data_summary:{…} }                      *\n*    4) CropMeta { output:{ base_yield_tons_per_ha, … } }       *\n****************************************************************/\n\nclass YieldPredictor {\n  constructor () {\n    this.weights = { temperature:0.25, rainfall:0.20, soilTemperature:0.15,\n                     humidity:0.15, sunlight:0.15,   soilType:0.10 };\n    this.yieldExponent = 1.5;\n  }\n\n  /* ============ PUBLIC ENTRY ============ */\n  run (blocks) {\n\n    const crop   = this.block(blocks, o => o.output)?.output || {};\n    const weather= this.extractWeather(blocks);\n    const soil   = this.block(blocks, o => o.soil_data_summary)\n                       ?.soil_data_summary || {};\n    const req    = this.block(blocks, o => o.Crop_Type) || {};\n\n    if (!crop.base_yield_tons_per_ha || !crop.optimal_conditions) {\n      throw new Error('Missing crop base yield or optimal_conditions');\n    }\n\n    const stressMap = this.calcStress(crop.optimal_conditions, weather, soil);\n    const overall   = this.weightedAvg(stressMap);\n\n    const yieldPerHa = crop.base_yield_tons_per_ha *\n                       Math.pow(overall, this.yieldExponent);\n\n    const farmHa  = Number(req.farm_size) || 0;\n    const total   = yieldPerHa * farmHa;\n\n    const conf    = this.confidence(stressMap, weather, soil);\n\n    return {\n      crop_type              : crop.crop,\n      commune                : crop.commune,\n      farm_size              : farmHa,\n      predicted_yield_per_ha : Number(yieldPerHa.toFixed(2)),\n      yield_unit_per_ha      : 'Tons/ha',\n      predicted_yield_total  : Number(total.toFixed(2)),\n      yield_unit_total       : 'Tons',\n\n      confidence_rating      : conf.word,     // Excellent/High/Average/Low\n      confidence_percent     : conf.percent,  // 0-100\n      confidence_notes       : conf.notes,\n\n      prediction_id          : `pred_${Date.now()}`,\n      timestamp              : new Date().toISOString()\n    };\n  }\n\n  /* ============ HELPERS ============ */\n\n  /* Return first block that matches predicate */\n  block (arr, pred) { return arr.find(pred) || {}; }\n\n  /* Weather aggregation from daily forecast */\n  extractWeather (arr) {\n    const wBlock = this.block(arr, o => o.timelines && o.timelines.daily);\n    const daily  = wBlock.timelines?.daily || [];\n    if (!daily.length) return {};\n\n    let t=0,h=0,r=0,s=0;\n    daily.forEach(d=>{\n      const v=d.values||{};\n      t+=v.temperatureAvg      ?? 0;\n      h+=v.humidityAvg         ?? 0;\n      r+=v.rainAccumulationSum ?? 0;\n      if (v.sunriseTime && v.sunsetTime){\n        s+=(new Date(v.sunsetTime)-new Date(v.sunriseTime))/3.6e6;\n      }\n    });\n    const n=daily.length;\n    return {\n      avgTemp      : t/n,\n      avgHumidity  : h/n,\n      totalRain    : r,\n      annualRainEst: (r/n)*365,\n      avgSunHours  : s/n\n    };\n  }\n\n  /* Generic key finder (case-insensitive regex) */\n  findValue (obj, regex) {\n    for (const [k,v] of Object.entries(obj)){\n      if (regex.test(k)) return v;\n    }\n    return undefined;\n  }\n\n  /* Stress-per-parameter 0.1–1.0 */\n  paramStress (value,[min,max]){\n    if (value==null) return 0.5;\n    if (value>=min && value<=max) return 1;\n    const dev = value<min ? (min-value)/min : (value-max)/max;\n    return Math.max(0.1, 1-dev);\n  }\n\n  calcStress (opt,W,soil){\n    /* soil temperature: look for any key containing both “soil” & “temperature” & “0-10” */\n    const soilTemp = this.findValue(soil, /soil.*temperature.*0.?-?10/i);\n\n    return {\n      temperature    : this.paramStress(W.avgTemp,       opt.temperature_range_c),\n      rainfall       : this.paramStress(W.annualRainEst, opt.annual_rainfall_mm),\n      soilTemperature: this.paramStress(soilTemp,        opt.soil_temperature_range_c),\n      humidity       : this.paramStress(W.avgHumidity,   opt.humidity_range_percent),\n      sunlight       : this.paramStress(W.avgSunHours,   opt.sunlight_hours_per_day),\n      soilType       : 0.8   // placeholder until soil-type compatibility table\n    };\n  }\n\n  weightedAvg (S){\n    let sum=0,w=0;\n    for(const k in this.weights){\n      if(S[k]!=null){\n        sum+=S[k]*this.weights[k];\n        w  +=       this.weights[k];\n      }\n    }\n    return w ? sum/w : 0.5;\n  }\n\n  confidence (S,W,soil){\n    const present={\n      temperature    : W.avgTemp!=null,\n      rainfall       : W.annualRainEst!=null,\n      soilTemperature: this.findValue(soil,/soil.*temperature.*0.?-?10/i)!=null,\n      humidity       : W.avgHumidity!=null,\n      sunlight       : W.avgSunHours!=null\n    };\n\n    const completeness=Object.values(present).filter(Boolean).length/\n                        Object.keys(present).length;\n    const reliability =Object.values(S).filter(v=>v!==0.5).length/\n                        Object.keys(S).length;\n    const percent=Math.round((0.7*completeness+0.3*reliability)*100);\n\n    let word='Low';\n    if     (percent>=85) word='Excellent';\n    else if(percent>=70) word='High';\n    else if(percent>=55) word='Average';\n\n    const notes=[`${word} confidence based on data coverage`];\n    if(!present.temperature   ) notes.push('Temperature data unavailable');\n    if(!present.rainfall      ) notes.push('Rainfall data unavailable');\n    if(!present.soilTemperature)notes.push('Soil temperature data unavailable');\n    if(!present.humidity      ) notes.push('Humidity data unavailable');\n    if(!present.sunlight      ) notes.push('Sunlight data unavailable');\n\n    return { word, percent, notes };\n  }\n}\n\n/* ============ n8n WRAPPER ============ */\ntry {\n  const payload = $input.all().map(i => i.json);       // ← array of blocks\n  const predictor = new YieldPredictor();\n  const result    = predictor.run(payload);\n\n  /* pick the contact from the request block, if present */\n  const contact = payload.find(o => o.Contact)?.Contact || null;\n\n  /* merge it into the result so one item is returned */\n  return [\n    {\n      json: {\n        ...result,\n        contact                           // adds \"contact\": \"user@example.com\"\n      }\n    }\n  ];\n\n} catch (e) {\n  return [\n    {\n      json: {\n        success : false,\n        error   : e.message\n      }\n    }\n  ];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1240,
+        320
+      ],
+      "id": "cb3dc8fb-a74b-41e6-9fca-b7abdd9ec191",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=HI please provide the suitaple conditions for:  {{ $json.Crop_Type }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a crop production expert and agronomist specializing in tropical crops. Given an input JSON with:\n\n{\n  \"Crop_Type\": \"{{ $json.Crop_Type }}\",\n  \"Commune\": \"{{ $json.Commune }}\"\n}\nyour task is to provide a detailed, scientifically realistic JSON response that describes the optimal growing conditions and yield potential for the specified crop, based on agronomic best practices and research for tropical environments. The response must focus on the best possible conditions for maximum yield for the crop — not adjusted or limited by any local or regional environmental factors.\n\nThe commune field is provided only for informational purposes, to give a general idea of the weather and climate conditions typical for that area, but it should not constrain or adjust the optimal conditions or yield estimates.\n\nRequired JSON response fields:\n\ncrop — crop name as input\n\ncommune — commune name as input (informational only)\n\nbase_yield_tons_per_ha — achievable yield (tons per hectare) under ideal conditions in tropical environments\n\naverage_unit_weight_kg — average weight per individual crop unit (e.g., per tuber, per fruit), used to relate yield to crop size please bare in mind most crops are under 2kg Averagely\n\naverage_units_per_ha — typical number of crop units harvested per hectare under optimal conditions\n\noptimal_conditions — a nested object describing the best conditions for the crop:\n\ntemperature_range_c (°C) — ideal air temperature during growing season\n\nannual_rainfall_mm (mm) — ideal total rainfall per year for optimal growth\n\nsoil_temperature_range_c (°C) — optimal soil temperature at root zone depth\n\nsoil_pH_range — ideal soil pH range\n\nhumidity_range_percent (%) — preferred relative humidity\n\nsunlight_hours_per_day — ideal daily sunlight exposure (hours)\n\nsoil_type — preferred soil type (e.g., sandy loam, well-drained)\n\nEnsure the response is in valid JSON format and reflects scientific agronomic knowledge for tropical crop production."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -1380,
+        560
+      ],
+      "id": "df0cc56c-4802-4d4f-84d6-95b1e2d166c9",
+      "name": "CROP_CONDITIONS",
+      "retryOnFail": true,
+      "alwaysOutputData": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "model": "mistral:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        560
+      ],
+      "id": "8d1dea3f-45d1-466e-8714-922425b93bc8",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "zwfmBX7DpH9Kol5V",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code2').item.json.contact }}",
+        "subject": "=ECOSYSTEM + YIELD PREDICTION",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>Yield Prediction Report</title>\n  <style>\n    /* ---- Basic reset ---- */\n    body      { margin:0; padding:0; font-family: \"Segoe UI\", Roboto, sans-serif; background:#F5F7FA; color:#333; }\n    table     { border-collapse:collapse; width:100%; }\n    .wrapper  { max-width:640px; margin:0 auto; }\n    /* ---- Card ---- */\n    .card     { background:#ffffff; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.07); padding:32px; }\n    .title    { font-size:24px; font-weight:600; color:#16A34A; margin:0 0 12px; }\n    .subtitle { font-size:16px; color:#64748B; margin:0 0 24px; }\n    /* ---- Key metric ---- */\n    .metric   { font-size:36px; font-weight:700; color:#0F766E; margin:0; }\n    .unit     { font-size:18px; font-weight:500; color:#0F766E; }\n    /* ---- Label / value pairs ---- */\n    .row      { padding:8px 0; }\n    .label    { font-weight:600; color:#475569; }\n    .value    { color:#334155; }\n    /* ---- Recommendation list ---- */\n    .rec li   { margin-bottom:6px; line-height:1.4; }\n    /* ---- Footer ---- */\n    .footer   { text-align:center; font-size:12px; color:#94A3B8; margin:24px 0 0; }\n    @media only screen and (max-width:520px){\n      .card   { padding:24px; }\n      .metric { font-size:28px; }\n    }\n  </style>\n</head>\n<body>\n  <div class=\"wrapper\">\n    <!-- Card -->\n    <div class=\"card\">\n      \n      <!-- Header -->\n      <h1 class=\"title\">EcoSystem+ Yield Prediction</h1>\n      <p class=\"subtitle\">\n        Crop&nbsp;·&nbsp;Commune&nbsp;·&nbsp;Summary\n      </p>\n\n      <!-- Main Metric -->\n      <p class=\"metric\">\n        {{ $('Code2').item.json.predicted_yield_per_ha }}\n        <span class=\"unit\">t&nbsp;/&nbsp;ha</span>\n      </p>\n\n      <!-- Details table -->\n      <table>\n        <tr class=\"row\">\n          <td class=\"label\">Crop:</td>\n          <td class=\"value\">{{ $('Code2').item.json.crop_type }}</td>\n        </tr>\n        <tr class=\"row\">\n          <td class=\"label\">Commune:</td>\n          <td class=\"value\">{{ $('Code2').item.json.commune }}</td>\n        </tr>\n        <tr class=\"row\">\n          <td class=\"label\">Farm size:</td>\n          <td class=\"value\">{{ $('Code2').item.json.farm_size }}&nbsp;ha</td>\n        </tr>\n        <tr class=\"row\">\n          <td class=\"label\">Total predicted yield:</td>\n          <td class=\"value\">\n            {{ $('Code2').item.json.predicted_yield_total }}&nbsp;Tons\n          </td>\n        </tr>\n        <tr class=\"row\">\n          <td class=\"label\">Summary:</td>\n          <td class=\"value\">{{ $json.output.summary }}</td>\n        </tr>\n      </table>\n\n      <!-- Divider -->\n      <hr style=\"border:none;border-top:1px solid #E2E8F0;margin:24px 0;\">\n\n      <!-- Recommendations -->\n      <h2 style=\"font-size:18px;font-weight:600;color:#16A34A;margin:0 0 12px;\">\n        Recommendations\n      </h2>\n      <ul class=\"rec\" style=\"padding-left:18px;margin:0;\">\n        <li>{{ $json.output.recommendations[0] }}</li>\n        <li>{{ $json.output.recommendations[1] }}</li>\n        <li>{{ $json.output.recommendations[2] }}</li>\n        <li>{{ $json.output.recommendations[3] }}</li>\n      </ul>\n\n      <!-- Notice -->\n      <p style=\"background:#FEFCE8;padding:12px;border-radius:6px;\n                color:#92400E;font-size:14px;margin:24px 0 0;\">\n        <strong>Notice:</strong> {{ $json.output.note }}\n      </p>\n\n      <!-- Timestamp -->\n      <p style=\"font-size:12px;color:#94A3B8;margin:16px 0 0;\">\n        Report generated&nbsp;·&nbsp;\n        {{ $('Code2').item.json.timestamp.toDateTime() }}\n      </p>\n    </div>\n\n    <!-- Footer -->\n    <p class=\"footer\">\n      © 2025 EcoSystem+&nbsp;•&nbsp;Empowering sustainable agriculture\n    </p>\n  </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "ECOSYSTEM +"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2760,
+        200
+      ],
+      "id": "e20a539e-d81c-4591-8e66-d34a52ab9006",
+      "name": "Gmail",
+      "webhookId": "ce86f3e0-e552-4748-acb7-c3144ea8929c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gsEGW35Gp1mDWIvn",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=YOU ARE TO USE:\nCrop_name: {{ $json.crop_type }}\nCommune: {{ $json.commune }}\nFarm_Size: {{ $json.farm_size }}\npredicted_yield_per_ha: {{ $json.predicted_yield_per_ha }}\nyield_unit_per_ha: {{ $json.yield_unit_per_ha }}\npredicted_yield_total : {{ $json.predicted_yield_total }}\n\nconfidence_rating: {{ $json.confidence_rating }}\nconfidence_notes: {{ $json.confidence_notes[0] }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are an expert agricultural advisor and crop production consultant. Your task is to analyze crop performance metrics and generate concise, practical, and scientifically grounded agronomic recommendations.\n\nYou will be provided with the following parameters:\n\n- Predicted yield in tons per hectare: {{ $json.prediction.predicted_yield_tons_per_ha }}\n- Predicted units per hectare: {{ $json.prediction.predicted_units_per_ha }}\n- Predicted weight of one unit (kg): {{ $json.prediction.predicted_unit_weight_kg }}\n- Yield efficiency percent: {{ $json.prediction.yield_efficiency_percent }}%\n- Crop name: {{ $json.prediction.crop }}\n- Commune: {{ $json.prediction.commune }}\n- General base yield in tons per hectare: {{ $json.prediction.base_yield_tons_per_ha }}\n- Overall stress level: {{ $json.analysis.overall_stress_level }}\n- Yield potential: {{ $json.analysis.yield_potential }}\n- Soil potential factor: {{ $json.stressFactors.soilType }}\n- Overall environmental stress factor: {{ $json.overallStressFactor }}\n\nYour response should:\n\n1. Start with a brief summary of the crop’s predicted performance vs its base yield.\n2. Provide 3–5 specific agronomic recommendations that would help improve or sustain yield for this crop in a tropical setting like Cameroon.\n3. If the stress level is “Moderate”, “High”, or “Severe”, suggest short-term and long-term mitigation measures.\n4. Consider improving soil structure, water availability, light interception, nutrient supply, or varietal selection where appropriate.\n5. Keep your response direct, structured in paragraphs, and suitable to be sent as a formal agronomic advisory message to a farmer or agricultural team.\n\nMake sure all advice is evidence-based, practical, and context-aware (i.e., relevant to {{ $json.prediction.crop }} in Cameroon or similar crops). Do not mention or analyze commune-specific weather unless instructed.\n{{ $json.sendTo }}\nCONTACT: \n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1780,
+        180
+      ],
+      "id": "1bfc8ea2-24be-41e8-bb32-4eb23dabde9d",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"summary\": \"Cassava in Akom_2 is yielding 15.8 tons/ha, close to the ideal 18.5 tons/ha. Efficiency is high at 85%, and stress is low.\",\n  \n  \"recommendations\": [\n    \"Keep current practices—they support healthy yields.\",\n    \"Rotate cassava with legumes to maintain soil health.\",\n    \"Watch for early disease signs like mosaic virus.\",\n    \"Test soil before the next planting season.\",\n    \"Add compost or manure to support long-term soil fertility.\"\n  ],\n  \n  \"note\": \"Conditions are favorable. No urgent action needed, just maintain and plan ahead.\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2000,
+        560
+      ],
+      "id": "fe4d3142-4e72-4776-ab83-9a7c03f5a171",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        700,
+        500
+      ],
+      "id": "500bc929-b529-406f-8342-6f1ad163ec9c",
+      "name": "MERGE"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -20,
+        -80
+      ],
+      "id": "675d42dc-cbe2-45f2-98d1-ff1d2600c273",
+      "name": "REGION_CONDITIONS"
+    },
+    {
+      "parameters": {
+        "content": "# Sending emails and Storage #",
+        "height": 1060,
+        "width": 1400,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2680,
+        60
+      ],
+      "id": "a59b170f-100c-48a6-bdc9-04c642b63347",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "GET COORDINATES HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "GET WEATHER DATA1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "GET COORDINATES HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CROP_CONDITIONS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET WEATHER DATA1": {
+      "main": [
+        [
+          {
+            "node": "GET SOIL DATA1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "GET SOIL DATA1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "REGION_CONDITIONS",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "REGION_CONDITIONS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "CROP_CONDITIONS",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "CROP_CONDITIONS",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase": {
+      "main": [
+        []
+      ]
+    },
+    "CROP_CONDITIONS": {
+      "main": [
+        [
+          {
+            "node": "MERGE",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "REGION_CONDITIONS": {
+      "main": [
+        [
+          {
+            "node": "MERGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "15bce401-29ff-4e29-90c7-0ef2c50f7edb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "85df8435861c8986a9270e34a3f6e503f81741145c1ce1881c6a0f6e5b986b7e"
+  },
+  "id": "9hPN6lqq0OrdTFAp",
+  "tags": []
+}

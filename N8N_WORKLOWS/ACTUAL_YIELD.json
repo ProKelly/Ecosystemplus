@@ -1,0 +1,157 @@
+{
+  "name": "ACTUAL YIELD",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "94cc7a69-6dfc-4ce5-8f61-4492dcc93757",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2160cb0f-8330-4cab-891d-e33f04ea8dcf",
+      "name": "Webhook",
+      "webhookId": "94cc7a69-6dfc-4ce5-8f61-4492dcc93757"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1dd2e92f-85e5-4de3-8271-f73e3c845517",
+              "name": "crop_type",
+              "value": "={{ $json.body.crop_type }}",
+              "type": "string"
+            },
+            {
+              "id": "5c5ed0de-fbd8-417d-9ffd-ab0d68e0e907",
+              "name": "commune",
+              "value": "={{ $json.body.commune }}",
+              "type": "string"
+            },
+            {
+              "id": "8019a123-6c75-49e9-af4c-2dad2c38e948",
+              "name": "farm_size",
+              "value": "={{ $json.body.farm_size }}",
+              "type": "number"
+            },
+            {
+              "id": "feb4a5cb-2220-4fd5-b8e2-ff67515d7d9b",
+              "name": "actual_yield",
+              "value": "={{ $json.body.actual_yield }}",
+              "type": "string"
+            },
+            {
+              "id": "dc03cf06-9f8d-430b-b6ef-7e032f4d6e75",
+              "name": "prediction_id",
+              "value": "={{ $json.body.prediction_id }}",
+              "type": "string"
+            },
+            {
+              "id": "504d4f5e-beb0-4b84-8f93-faf524f79d80",
+              "name": "unit",
+              "value": "={{ $json.body.unit }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ],
+      "id": "c507330a-99ed-490a-83d5-e734ab4097ec",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "tableId": "ACTUAL_YIELD  TABLE",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "Commune",
+              "fieldValue": "={{ $json.commune }}"
+            },
+            {
+              "fieldId": "Farm Size (Hectares)",
+              "fieldValue": "={{ $json.farm_size }}"
+            },
+            {
+              "fieldId": "Crop Name",
+              "fieldValue": "={{ $json.crop_type }}"
+            },
+            {
+              "fieldId": "Unit",
+              "fieldValue": "={{ $json.unit }}"
+            },
+            {
+              "fieldId": "Actual Yield",
+              "fieldValue": "={{ $json.actual_yield }}"
+            },
+            {
+              "fieldId": "Prediction Id",
+              "fieldValue": "={{ $json.prediction_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        460,
+        0
+      ],
+      "id": "1fd37aa3-7b92-41af-ae23-cbb742b32d0f",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2cfc868knHuFoXWU",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "989eb105-bc3b-4d4e-a928-f7858035e195",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "85df8435861c8986a9270e34a3f6e503f81741145c1ce1881c6a0f6e5b986b7e"
+  },
+  "id": "WJdbsIJa0lt8DUnx",
+  "tags": []
+}
