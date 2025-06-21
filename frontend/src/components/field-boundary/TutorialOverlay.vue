@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-
-defineEmits(['close'])
+import { ref, computed } from 'vue'
+const emit = defineEmits(['close'])
 
 // Tutorial steps
 interface TutorialStep {

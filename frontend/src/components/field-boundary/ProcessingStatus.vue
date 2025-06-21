@@ -7,6 +7,14 @@ const props = defineProps({
     type: Array as PropType<Field[]>,
     required: true,
     default: () => []
+  },
+  progress: {
+    type: Number,
+    required: true
+  },
+  estimatedTime: {
+    type: String,
+    required: true
   }
 })
 
