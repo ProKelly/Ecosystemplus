@@ -14,6 +14,9 @@ from pathlib import Path
 from datetime import timedelta
 
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal311.dll"  # Update this path to your GDAL DLL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -93,11 +96,11 @@ WSGI_APPLICATION = 'main.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'ecosystemplus',
-        'USER': 'postgres',
-        'PASSWORD': 'prince@2025',
-        'HOST': 'localhost',
-        'PORT': '5432'
+        'NAME': os.getenv('DB_NAME', 'ecosystemplus'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
