@@ -5,7 +5,6 @@ import 'leaflet/dist/leaflet.css'
 import 'leaflet-draw'
 import 'leaflet-draw/dist/leaflet.draw.css'
 import 'leaflet-geometryutil'
-import type { LatLng, Map, FeatureGroup, Control, TileLayer } from 'leaflet'
 
 // Leaflet marker icon fix
 delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -18,13 +17,13 @@ L.Icon.Default.mergeOptions({
 // Data & refs
 const showMap = ref(false)
 const farmName = ref('')
-const polygonCoordinates = ref<LatLng[]>([])
+const polygonCoordinates = ref<L.LatLng[]>([])
 const manualCoordinates = ref<{ lat: number; lng: number }[]>([])
 const selectedFarm = ref('')
 const manualMode = ref(false)
 const farms = ref<Record<string, any>>({})
 const mapContainer = ref<HTMLElement | null>(null)
-const map = ref<Map | null>(null)
+const map = ref<L.Map | null>(null)
 const isFullScreen = ref(false)
 const showRegistrationMethods = ref(false)
 

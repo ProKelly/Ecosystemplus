@@ -8,6 +8,8 @@ import PersonalizedRecommendations from '@/components/personalized-recommendatio
 import Bot from '@/components/personalized-recommendations/Bot.vue'
 import ForestMonitor from '../views/ForestMonitor.vue'
 import ForestRegister from '../views/ForestRegister.vue'
+import Farm from '../views/Farm.vue'
+import FieldBoundaryDetail from '@/components/field-boundary/FieldBoundaryDetail.vue'
 
 
 const router = createRouter({
@@ -49,10 +51,20 @@ const router = createRouter({
       component: FieldBoundaryDetection
     },
     {
+      path: '/fields/:id',
+      name: 'field-boundary-detail',
+      component: FieldBoundaryDetail
+    },
+    {
       path: '/personalized-recommendations',
       name: 'personalized-recommendations',
       component: Bot
-    }
+    },
+    {
+      path: '/farm',
+      name: 'farm',
+      component: Farm
+    },
   ],
 })
 

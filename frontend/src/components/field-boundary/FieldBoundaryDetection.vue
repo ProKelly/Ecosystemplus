@@ -1,666 +1,502 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import L from 'leaflet'
-import 'leaflet-draw'
+import 'leaflet/dist/leaflet.css'
+import { Bars3Icon, XMarkIcon, MapPinIcon, ScaleIcon, ChartBarIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
+import axios from 'axios'
+import router from '@/router'
 
-// State management
-const mapLoaded = ref(false)
-const isProcessing = ref(false)
-const showTutorial = ref(false)
-const activeTab = ref<'detect' | 'edit' | 'analyze'>('detect')
-const detectionHistory = ref<Array<any>>([])
-const collaborationMode = ref(false)
-const mapMode = ref<'2d' | '3d'>('2d') // '2d' or '3d'
-const currentLayer = ref<'satellite' | 'ndvi' | 'terrain'>('satellite')
-const sensitivity = ref<number>(70)
-const accuracyScore = ref<number>(0)
-const processingProgress = ref<number>(0)
-const estimatedTime = ref<string>('2 minutes')
-const activeUsers = ref<Array<{ id: number; name: string; color: string }>>([])
-const showLayerDropdown = ref(false)
-const isFullScreen = ref(false)
+// Map and UI state
+const map = ref<L.Map | null>(null)
+const mapContainer = ref<HTMLElement | null>(null)
+const drawnItems = ref<L.FeatureGroup | null>(null)
+const drawControl = ref<L.Control.Draw | null>(null)
+const leftPanelOpen = ref(true)
+const rightPanelOpen = ref(true)
+const isFullScreenMap = ref(false)
+const selectedField = ref<any>(null)
+const isLoading = ref(false)
 
-// Mock data
-const detectedFields = ref<Array<{
-  id: number;
-  name: string;
-  area: string;
-  coordinates: any[];
-  date: string;
-  accuracy: string;
-  problems: { type: string; location: number[] }[];
-}>>([
-  {
-    id: 1,
-    name: 'North Field',
-    area: '12.5 ha',
-    coordinates: [],
-    date: '2023-11-15',
-    accuracy: '98%',
-    problems: [{ type: 'overlap', location: [35.12, -89.99] }]
-  },
-  {
-    id: 2,
-    name: 'South Field',
-    area: '8.2 ha',
-    coordinates: [],
-    date: '2023-11-10',
-    accuracy: '95%',
-    problems: []
-  }
+// Dummy data (replace with API calls)
+const farms = ref([
+  { id: 1, name: 'Main Field', location: 'Nairobi', size: 4.2, date: '2023-10-15' },
+  { id: 2, name: 'North Plot', location: 'Kiambu', size: 2.8, date: '2023-09-22' },
+  { id: 3, name: 'River Side', location: 'Machakos', size: 3.5, date: '2023-11-05' }
 ])
+const soilData = ref({
+  type: 'Loam',
+  pH: 6.5,
+  texture: 'Medium',
+  carbon: 2.3,
+  moisture: 65
+})
+const recommendedCrops = ref(['Maize', 'Beans', 'Wheat', 'Potatoes'])
 
-// Map references
-let map: L.Map | null = null
-let drawnItems: L.FeatureGroup | null = null
-let drawControl: L.Control.Draw | null = null
-let baseLayer: L.TileLayer | null = null
-
+// Initialize map
 onMounted(() => {
-  initMap()
-  loadUserHistory()
+  if (mapContainer.value) {
+    map.value = L.map(mapContainer.value, {
+      center: [-1.2921, 36.8219], // Nairobi coordinates
+      zoom: 13,
+      zoomControl: false
+    })
+
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map.value)
+
+    // Add satellite layer (Mapbox)
+    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+      attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a>',
+      maxZoom: 20,
+      id: 'mapbox/satellite-v9',
+      tileSize: 512,
+      zoomOffset: -1,
+      accessToken: 'your_mapbox_access_token' // Replace with actual token
+    }).addTo(map.value)
+
+    // Initialize feature group for drawn items
+    drawnItems.value = new L.FeatureGroup()
+    map.value.addLayer(drawnItems.value)
+
+    // Initialize draw control
+    drawControl.value = new L.Control.Draw({
+      position: 'topright',
+      draw: {
+        polygon: {
+          allowIntersection: false,
+          showArea: true,
+          metric: true,
+          shapeOptions: {
+            color: '#10b981',
+            fillColor: '#10b981',
+            fillOpacity: 0.3
+          }
+        },
+        rectangle: false,
+        circle: false,
+        circlemarker: false,
+        marker: false,
+        polyline: false
+      },
+      edit: {
+        featureGroup: drawnItems.value
+      }
+    })
+    map.value.addControl(drawControl.value)
+
+    // Add zoom control
+    L.control.zoom({ position: 'topright' }).addTo(map.value)
+
+    // Handle draw events
+    map.value.on(L.Draw.Event.CREATED, (e: any) => {
+      const layer = e.layer
+      drawnItems.value?.addLayer(layer)
+      const area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]) / 10000
+      layer.bindPopup(`Field Area: ${area.toFixed(2)} ha`)
+      analyzeField(layer)
+    })
+
+    // Handle edit events
+    map.value.on(L.Draw.Event.EDITED, (e: any) => {
+      e.layers.eachLayer((layer: any) => analyzeField(layer))
+    })
+
+    // Load sample fields
+    fetchSampleFields()
+  }
 })
 
-const initMap = () => {
-  // Initialize Leaflet map with Yaounde, Cameroon as default
-  if (map) return; // Prevent double initialization
-  map = L.map('boundary-map', {
-    center: [3.848, 11.5021], // Yaounde, Cameroon
-    zoom: 13,
-    preferCanvas: true
-  })
+// Cleanup on unmount
+onUnmounted(() => {
+  if (map.value) {
+    map.value.remove()
+    map.value = null
+  }
+})
 
-  // Add base layers
-  baseLayer = L.tileLayer(getTileUrl(currentLayer.value), {
-    attribution: '&copy; OpenStreetMap contributors'
-  })
-  baseLayer.addTo(map)
-
-  // Initialize feature group to store drawn items
-  drawnItems = new L.FeatureGroup()
-  map.addLayer(drawnItems)
-
-  // Initialize the draw control
-  drawControl = new L.Control.Draw({
-    edit: {
-      featureGroup: drawnItems
+// Fetch sample fields (replace with API call)
+async function fetchSampleFields() {
+  // Simulated API call
+  const sampleFields = [
+    {
+      name: 'North Field',
+      coords: [[-1.29, 36.82], [-1.29, 36.83], [-1.30, 36.83], [-1.30, 36.82]]
     },
-    draw: {
-      polygon: {
-        allowIntersection: false,
-        showArea: true,
-        metric: true,
-        shapeOptions: {
-          color: '#3B82F6',
-          fillColor: '#3B82F6',
-          fillOpacity: 0.4
-        }
-      },
-      rectangle: false,
-      circle: true,
-      marker: false,
-      circlemarker: false
+    {
+      name: 'East Plot',
+      coords: [[-1.28, 36.82], [-1.28, 36.825], [-1.285, 36.825], [-1.285, 36.82]]
     }
-  })
-  map.addControl(drawControl)
+  ]
 
-  // Add event listeners
-  map.on(L.Draw.Event.CREATED, handleDrawCreated)
-  map.on(L.Draw.Event.EDITED, handleEdit)
-  map.on(L.Draw.Event.DELETED, handleDelete)
+  // TODO: Replace with actual API call
+  // const response = await axios.get('/api/fields')
+  // const sampleFields = response.data
 
-  mapLoaded.value = true
-}
+  sampleFields.forEach(field => {
+    const polygon = L.polygon(field.coords, {
+      color: '#10b981',
+      fillColor: '#10b981',
+      fillOpacity: 0.3,
+      weight: 2
+    }).addTo(map.value!)
 
-function getTileUrl(layer: 'satellite' | 'ndvi' | 'terrain') {
-  switch (layer) {
-    case 'satellite':
-      return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    case 'ndvi':
-      // Placeholder NDVI layer (replace with real NDVI tiles if available)
-      return 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png';
-    case 'terrain':
-      // Placeholder terrain layer (replace with real terrain tiles if available)
-      return 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
-    default:
-      return 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  }
-}
-
-const handleDrawCreated = (e: any) => {
-  const layer = e.layer
-  drawnItems?.addLayer(layer)
-  // Add custom properties to the layer
-  layer.feature = layer.feature || {}
-  layer.feature.properties = {
-    id: Date.now(),
-    name: `Field ${detectedFields.value.length + 1}`,
-    accuracy: 0,
-    area: L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]) / 10000
-  }
-  detectedFields.value.push(layer.feature.properties)
-}
-
-const handleEdit = (e: any) => {
-  const layers = e.layers
-  layers.eachLayer((layer: any) => {
-    updateFieldProperties(layer)
+    polygon.bindPopup(`<b>${field.name}</b><br>Click to analyze`)
+    polygon.on('click', () => analyzeField(polygon))
   })
 }
 
-const handleDelete = (e: any) => {
-  const layers = e.layers
-  layers.eachLayer((layer: any) => {
-    // Remove from detectedFields if needed
-  })
-}
-
-const updateFieldProperties = (layer: any) => {
-  // Recalculate area and update accuracy
+// Analyze field (replace with API call)
+async function analyzeField(layer: any) {
+  isLoading.value = true
   const area = L.GeometryUtil.geodesicArea(layer.getLatLngs()[0]) / 10000
-  const accuracy = calculateAccuracy(layer)
-  
-  layer.feature.properties.area = area.toFixed(2)
-  layer.feature.properties.accuracy = accuracy
-  
-  // Update our state
-  const index = detectedFields.value.findIndex(
-    field => field.id === layer.feature.properties.id
-  )
-  if (index !== -1) {
-    detectedFields.value[index] = { ...layer.feature.properties }
-  }
-}
 
-const calculateAccuracy = (layer: any) => {
-  // Mock accuracy calculation based on polygon complexity
-  const latLngs = layer.getLatLngs()[0]
-  const complexityScore = Math.min(100, latLngs.length * 5)
-  return Math.floor(complexityScore * 0.8 + Math.random() * 20)
-}
-
-const autoDetectBoundaries = () => {
-  isProcessing.value = true
-  processingProgress.value = 0
-  
-  // Simulate processing with progress updates
-  const interval = setInterval(() => {
-    processingProgress.value += Math.floor(Math.random() * 10)
-    estimatedTime.value = `${Math.max(0, 120 - processingProgress.value * 1.2)} seconds`
-    
-    if (processingProgress.value >= 100) {
-      clearInterval(interval)
-      isProcessing.value = false
-      completeDetection()
+  // Simulated API response
+  const fieldData = {
+    geometry: layer.getLatLngs()[0],
+    area: area.toFixed(2),
+    soil: {
+      type: ['Sandy Loam', 'Clay Loam', 'Silty Clay', 'Loam'][Math.floor(Math.random() * 4)],
+      pH: (5.5 + Math.random() * 2.5).toFixed(1),
+      carbon: (1 + Math.random() * 3).toFixed(1),
+      texture: ['Fine', 'Medium', 'Coarse'][Math.floor(Math.random() * 3)],
+      moisture: Math.floor(30 + Math.random() * 60)
     }
-  }, 800)
-}
-
-const completeDetection = () => {
-  // Mock detection results
-  const mockField = {
-    id: Date.now(),
-    name: 'Mock Field',
-    area: '10.0 ha',
-    date: new Date().toISOString().slice(0, 10),
-    accuracy: '90%',
-    coordinates: [],
-    problems: []
   }
-  
-  detectionHistory.value.unshift(mockField)
-  accuracyScore.value = parseInt(mockField.accuracy)
-  
-  // Add to map
-  const polygon = L.polygon(mockField.coordinates, {
-    color: '#10B981',
-    fillColor: '#10B981',
-    fillOpacity: 0.4
+
+  // TODO: Replace with actual API call
+  // const response = await axios.post('/api/analyze-field', { geometry: layer.getLatLngs()[0] })
+  // const fieldData = response.data
+
+  selectedField.value = fieldData
+  soilData.value = fieldData.soil
+  updateRecommendedCrops(fieldData.soil.type)
+
+  layer.setStyle({
+    color: '#2563eb',
+    fillColor: '#2563eb',
+    fillOpacity: 0.3
   })
-  polygon.feature = {
-    properties: mockField
-  }
-  drawnItems.addLayer(polygon)
-  detectedFields.value.push(mockField)
+
+  layer.bindPopup(`
+    <div class="space-y-2 p-2">
+      <h4 class="font-bold text-base">Field Analysis</h4>
+      <p class="text-sm">Area: ${area.toFixed(2)} ha</p>
+      <p class="text-sm">Soil: ${fieldData.soil.type}</p>
+      <p class="text-sm">pH: ${fieldData.soil.pH}</p>
+      <button onclick="this.dispatchEvent(new CustomEvent('view-details', { bubbles: true }))" 
+        class="mt-2 px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600"
+        @click="viewField(selectedField.value.geometry)">
+        View Details
+      </button>
+    </div>
+  `).openPopup()
+
+  isLoading.value = false
 }
 
-const generateMockPolygon = () => {
-  // Generate a simple mock polygon around the center
-  const center = map.getCenter()
-  const lat = center.lat
-  const lng = center.lng
-  const variation = 0.02
-  
-  return [
-    [lat + variation * Math.random(), lng + variation * Math.random()],
-    [lat + variation * Math.random(), lng - variation * Math.random()],
-    [lat - variation * Math.random(), lng - variation * Math.random()],
-    [lat - variation * Math.random(), lng + variation * Math.random()]
+function viewField(geometry: any) {
+  // Navigate to farm details page (replace with actual navigation logic)
+  console.log('Viewing farm with geometry:', geometry)
+  router.push(`/fields/${geometry.id}`)
+}
+
+// Update recommended crops based on soil type
+function updateRecommendedCrops(soilType: string) {
+  const cropMap: Record<string, string[]> = {
+    'Sandy Loam': ['Maize', 'Beans', 'Watermelon', 'Groundnuts'],
+    'Clay Loam': ['Rice', 'Wheat', 'Barley', 'Cabbage'],
+    'Silty Clay': ['Potatoes', 'Carrots', 'Onions', 'Garlic'],
+    'Loam': ['Maize', 'Beans', 'Tomatoes', 'Kale']
+  }
+  recommendedCrops.value = cropMap[soilType] || ['Maize', 'Beans', 'Wheat', 'Potatoes']
+}
+
+// Trigger boundary detection (replace with API call)
+async function triggerBoundaryDetection() {
+  isLoading.value = true
+  const toast = document.createElement('div')
+  toast.className = 'fixed top-4 right-4 bg-emerald-600 text-white px-4 py-2 rounded-md shadow-lg z-[1000]'
+  toast.textContent = 'Detecting field boundaries...'
+  document.body.appendChild(toast)
+
+  // Simulated API response
+  const newFieldCoords = [
+    [-1.291, 36.818],
+    [-1.291, 36.821],
+    [-1.293, 36.821],
+    [-1.293, 36.818]
   ]
-}
 
-const exportData = (format: string) => {
-  // Export functionality would go here
-  alert(`Exporting data in ${format} format`)
-}
+  // TODO: Replace with actual API call
+  // const response = await axios.post('/api/detect-boundaries', { center: map.value?.getCenter() })
+  // const newFieldCoords = response.data.coords
 
-const toggle3DView = () => {
-  mapMode.value = mapMode.value === '2d' ? '3d' : '2d'
-  // Placeholder: Show alert for now
-  alert('3D view is not implemented. Please integrate a 3D map library for full support.')
-}
-
-const handleLayerDropdown = (event?: MouseEvent) => {
-  if (event) event.stopPropagation();
-  showLayerDropdown.value = !showLayerDropdown.value;
-}
-
-const closeLayerDropdown = (e: MouseEvent) => {
-  const dropdown = document.getElementById('layer-dropdown');
-  if (dropdown && !dropdown.contains(e.target as Node)) {
-    showLayerDropdown.value = false;
-    document.removeEventListener('mousedown', closeLayerDropdown);
-  }
-}
-
-watch(showLayerDropdown, (val) => {
-  if (val) {
-    setTimeout(() => {
-      document.addEventListener('mousedown', closeLayerDropdown);
-    }, 0);
-  } else {
-    document.removeEventListener('mousedown', closeLayerDropdown);
-  }
-})
-
-const changeBaseLayer = (layer: 'satellite' | 'ndvi' | 'terrain') => {
-  currentLayer.value = layer
-  showLayerDropdown.value = false
-  if (map) {
-    // Remove all tile layers (but not overlays)
-    map.eachLayer((l: any) => {
-      if (l instanceof L.TileLayer && l !== drawnItems && l !== drawControl) {
-        map.removeLayer(l)
-      }
-    })
-    baseLayer = L.tileLayer(getTileUrl(layer), {
-      attribution: '&copy; OpenStreetMap contributors'
-    })
-    baseLayer.addTo(map)
-  }
-}
-
-const loadUserHistory = () => {
-  // Simulate loading user's detection history
   setTimeout(() => {
-    detectionHistory.value = [
-      {
-        id: 3,
-        name: 'East Field',
-        area: '15.2 ha',
-        date: '2023-10-28',
-        accuracy: '92%',
-        coordinates: [],
-        problems: []
-      },
-      {
-        id: 4,
-        name: 'West Field',
-        area: '9.7 ha',
-        date: '2023-10-15',
-        accuracy: '89%',
-        coordinates: [],
-        problems: []
-      }
-    ]
-  }, 500)
+    const newField = L.polygon(newFieldCoords, {
+      color: '#10b981',
+      fillColor: '#10b981',
+      fillOpacity: 0.3,
+      weight: 2
+    }).addTo(map.value!)
+
+    newField.bindPopup('Detected Field<br>Click to analyze')
+    newField.on('click', () => analyzeField(newField))
+
+    toast.textContent = 'Field boundaries detected!'
+    setTimeout(() => toast.remove(), 3000)
+    isLoading.value = false
+  }, 2000)
 }
 
-const startTutorial = () => {
-  showTutorial.value = true
-}
-
-const inviteCollaborator = () => {
-  collaborationMode.value = true
-  activeUsers.value = [
-    { id: 1, name: 'You', color: '#3B82F6' },
-    { id: 2, name: 'Collaborator 1', color: '#10B981' }
-  ]
-}
-
-const toggleFullScreen = () => {
-  isFullScreen.value = !isFullScreen.value
-  const mapContainer = document.getElementById('boundary-map-container')
-  if (mapContainer) {
-    if (isFullScreen.value) {
-      mapContainer.requestFullscreen?.()
-    } else {
-      document.exitFullscreen?.()
-    }
-    setTimeout(() => { map?.invalidateSize() }, 300)
+// Toggle full-screen map
+function toggleFullScreenMap() {
+  isFullScreenMap.value = !isFullScreenMap.value
+  if (isFullScreenMap.value) {
+    leftPanelOpen.value = false
+    rightPanelOpen.value = false
   }
-}
-
-// Listen for exiting fullscreen via ESC or browser UI
-if (typeof window !== 'undefined') {
-  document.addEventListener('fullscreenchange', () => {
-    const mapContainer = document.getElementById('boundary-map-container')
-    if (!document.fullscreenElement && isFullScreen.value) {
-      isFullScreen.value = false
-      map?.invalidateSize()
-    }
-  })
+  // Trigger map resize
+  setTimeout(() => map.value?.invalidateSize(), 300)
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
+  <div class="flex flex-col h-screen overflow-hidden">
     <div class="block p-8">
 
     </div>
-
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- Left Sidebar - Controls -->
-        <div class="lg:col-span-1 space-y-6">
-          <!-- Detection Mode Tabs -->
-          <div class="bg-white rounded-lg shadow p-4">
-            <div class="border-b border-gray-200">
-              <nav class="-mb-px flex space-x-4">
-                <button
-                  v-for="tab in ['detect', 'edit', 'analyze']"
-                  :key="tab"
-                  @click="activeTab = tab as 'detect' | 'edit' | 'analyze'"
-                  :class="[
-                    activeTab === tab
-                      ? 'border-emerald-500 text-emerald-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                    'whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm'
-                  ]"
-                >
-                  {{ tab.charAt(0).toUpperCase() + tab.slice(1) }}
-                </button>
-              </nav>
-            </div>
-
-            <!-- Detection Controls -->
-            <div v-show="activeTab === 'detect'" class="mt-4 space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Detection Sensitivity</label>
-                <input 
-                  type="range" 
-                  v-model="sensitivity"
-                  min="0" 
-                  max="100" 
-                  class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                >
-                <div class="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>Low</span>
-                  <span>Medium</span>
-                  <span>High</span>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 md:flex gap-2">
-                <button
-                  @click="autoDetectBoundaries"
-                  class="flex items-center justify-center px-2 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none"
-                >
-                  <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Auto-Detect
-                </button>
-                <button
-                  class="flex items-center justify-center px-2 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
-                >
-                  <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  Manual
-                </button>
-              </div>
-            </div>
-
-            <!-- Edit Controls -->
-            <div v-show="activeTab === 'edit'" class="mt-4 space-y-4">
-              <div class="space-y-2">
-                <button
-                  class="w-full flex items-center justify-between px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  <span>Split Field</span>
-                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </button>
-                <button
-                  class="w-full flex items-center justify-between px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  <span>Merge Fields</span>
-                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </button>
-                <button
-                  class="w-full flex items-center justify-between px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  <span>Adjust Vertices</span>
-                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </button>
-                <button
-                  class="w-full flex items-center justify-between px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  <span>Highlight Problem Areas</span>
-                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </button>
-                <button
-                  class="w-full flex items-center justify-between px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  <span>Compare with History</span>
-                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Data Import/Export -->
-          <div class="bg-white rounded-lg shadow p-4">
-            <h3 class="text-sm font-medium text-gray-900 mb-3">Data Management</h3>
-            <div class="grid grid-cols-2 gap-3">
-              <button
-                class="flex items-center justify-center px-3 py-2 border border-gray-300 text-xs font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
+    <div class="flex flex-col flex-1 overflow-hidden">
+      <!-- Map and Sidebars -->
+      <div class="relative flex flex-col md:flex-row flex-1 overflow-hidden">
+        <!-- Left Sidebar (Your Farms) -->
+        <div 
+          class="md:w-80 w-full bg-white border-r border-gray-200 shadow-sm transition-all duration-300 z-20"
+          :class="{
+            'translate-x-0': leftPanelOpen && !isFullScreenMap,
+            '-translate-x-full absolute md:relative': !leftPanelOpen || isFullScreenMap,
+            'hidden md:block': isFullScreenMap
+          }"
+        >
+          <div class="p-4 h-full flex flex-col overflow-y-auto">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+              <MapPinIcon class="h-5 w-5 mr-2 text-emerald-600" />
+              Your Farms
+            </h2>
+            <div class="space-y-3 mb-4">
+              <div 
+                v-for="farm in farms" 
+                :key="farm.id"
+                class="p-3 border border-gray-200 rounded-lg hover:border-emerald-300 hover:bg-emerald-50 cursor-pointer transition-colors"
+                @click="selectedField = { name: farm.name, area: farm.size }"
               >
-                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                Import
-              </button>
-              <div class="relative">
-                <button
-                  @click="exportData('geojson')"
-                  class="w-full flex items-center justify-center px-3 py-2 border border-gray-300 text-xs font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Export
-                </button>
-                <div class="absolute right-0 mt-1 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10 hidden">
-                  <div class="py-1">
-                    <button @click="exportData('geojson')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">GeoJSON</button>
-                    <button @click="exportData('shapefile')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Shapefile</button>
-                    <button @click="exportData('kml')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KML</button>
-                  </div>
-                </div>
+                <h3 class="font-semibold text-gray-800">{{ farm.name }}</h3>
+                <p class="text-sm text-gray-600">{{ farm.location }} • {{ farm.size }} ha</p>
+                <p class="text-xs text-gray-500 mt-1">Added: {{ farm.date }}</p>
               </div>
             </div>
-          </div>
-
-          <!-- Detected Fields List -->
-          <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
-              <h3 class="text-sm font-medium text-gray-900">Detected Fields</h3>
-            </div>
-            <ul class="divide-y divide-gray-200">
-              <li v-for="field in detectedFields" :key="field.id" class="px-4 py-3 hover:bg-gray-50 cursor-pointer">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <p class="text-sm font-medium text-gray-900">{{ field.name }}</p>
-                    <p class="text-xs text-gray-500">{{ field.area }} • {{ field.accuracy }} accuracy</p>
-                  </div>
-                  <button class="text-gray-400 hover:text-gray-500">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                </div>
-              </li>
-            </ul>
+            <button 
+              class="mt-auto w-full flex items-center justify-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+              :disabled="isLoading"
+              @click="triggerBoundaryDetection"
+            >
+              <ArrowPathIcon class="h-5 w-5 mr-2" />
+              Delimit Boundaries
+            </button>
           </div>
         </div>
 
-        <!-- Main Map Area -->
-        <div class="lg:col-span-3">
-          <div class="bg-white rounded-lg shadow overflow-hidden">
-            <!-- Map Toolbar -->
-            <div class="px-4 py-2 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-              <div class="flex space-x-2">
-                <button
-                  @click="toggle3DView"
-                  class="px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  {{ mapMode === '2d' ? '3D View' : '2D View' }}
-                </button>
-                <div class="relative">
-                  <button
-                    class="px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 flex items-center"
-                    @click="handleLayerDropdown"
-                    type="button"
+        <!-- Map Area -->
+        <div class="flex-1 relative">
+          <div 
+            ref="mapContainer" 
+            class="h-full w-full z-0"
+          ></div>
+
+          <!-- Map Controls -->
+          <div class="absolute top-4 left-4 space-y-2 z-30 md:top-4 md:left-4 left-2 top-2">
+            <button 
+              class="p-2 bg-white rounded-md shadow-md hover:bg-gray-50 transition-colors"
+              @click="leftPanelOpen = !leftPanelOpen"
+              :title="leftPanelOpen ? 'Hide Farms panel' : 'Show Farms panel'"
+              :disabled="isFullScreenMap"
+            >
+              <Bars3Icon v-if="!leftPanelOpen" class="h-5 w-5 text-gray-700" />
+              <XMarkIcon v-else class="h-5 w-5 text-gray-700" />
+            </button>
+            <button 
+              class="p-2 bg-white rounded-md shadow-md hover:bg-gray-50 transition-colors"
+              @click="rightPanelOpen = !rightPanelOpen"
+              :title="rightPanelOpen ? 'Hide Analysis panel' : 'Show Analysis panel'"
+              :disabled="isFullScreenMap"
+            >
+              <ChartBarIcon class="h-5 w-5 text-gray-700" />
+            </button>
+            <button 
+              class="p-2 bg-white rounded-md shadow-md hover:bg-gray-50 transition-colors"
+              @click="toggleFullScreenMap"
+              :title="isFullScreenMap ? 'Exit full screen' : 'Full screen map'"
+            >
+              <ArrowsPointingOutIcon v-if="!isFullScreenMap" class="h-5 w-5 text-gray-700" />
+              <ArrowsPointingInIcon v-else class="h-5 w-5 text-gray-700" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Sidebar (Field Analysis) -->
+        <div 
+          class="md:w-80 w-full bg-white border-l border-gray-200 shadow-sm transition-all duration-300 z-20"
+          :class="{
+            'translate-x-0': rightPanelOpen && !isFullScreenMap,
+            'translate-x-full absolute right-0 md:relative': !rightPanelOpen || isFullScreenMap,
+            'hidden md:block': isFullScreenMap
+          }"
+        >
+          <div class="p-4 h-full flex flex-col overflow-y-auto">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+              <ScaleIcon class="h-5 w-5 mr-2 text-emerald-600" />
+              Field Analysis
+            </h2>
+            <div v-if="selectedField" class="space-y-4">
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <h3 class="font-semibold text-gray-800">{{ selectedField.name || 'Selected Field' }}</h3>
+                <p class="text-sm text-gray-600">{{ selectedField.area }} hectares</p>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-700 mb-2 flex items-center">
+                  <MapPinIcon class="h-4 w-4 mr-1 text-emerald-600" />
+                  Recommended Crops
+                </h3>
+                <div class="flex flex-wrap gap-2">
+                  <span 
+                    v-for="(crop, index) in recommendedCrops" 
+                    :key="index"
+                    class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs rounded-full"
                   >
-                    <span>{{ currentLayer.toUpperCase() }}</span>
-                    <svg class="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  <div
-                    v-if="showLayerDropdown"
-                    id="layer-dropdown"
-                    class="absolute z-10 mt-1 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-                    @mousedown.stop
-                  >
-                    <div class="py-1">
-                      <button @mousedown.stop @click="changeBaseLayer('satellite')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">Satellite</button>
-                      <button @mousedown.stop @click="changeBaseLayer('ndvi')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">NDVI</button>
-                      <button @mousedown.stop @click="changeBaseLayer('terrain')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">Terrain</button>
+                    {{ crop }}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-700 mb-2">Soil Information</h3>
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-sm mb-1">
+                      <span>Type</span>
+                      <span class="font-medium">{{ soilData.type }}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        class="bg-emerald-600 h-2.5 rounded-full" 
+                        :style="{ width: ['Sandy Loam', 'Clay Loam', 'Silty Clay', 'Loam'].indexOf(soilData.type) * 33 + 33 + '%' }"
+                      ></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-sm mb-1">
+                      <span>pH Level</span>
+                      <span class="font-medium">{{ soilData.pH }}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        class="bg-emerald-600 h-2.5 rounded-full" 
+                        :style="{ width: ((parseFloat(soilData.pH) - 4) / 6) * 100 + '%' }"
+                      ></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-sm mb-1">
+                      <span>Carbon %</span>
+                      <span class="font-medium">{{ soilData.carbon }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        class="bg-emerald-600 h-2.5 rounded-full" 
+                        :style="{ width: (parseFloat(soilData.carbon) / 4 * 100) + '%' }"
+                      ></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-sm mb-1">
+                      <span>Moisture</span>
+                      <span class="font-medium">{{ soilData.moisture }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        class="bg-emerald-600 h-2.5 rounded-full" 
+                        :style="{ width: soilData.moisture + '%' }"
+                      ></div>
                     </div>
                   </div>
                 </div>
-                <!-- Fullscreen Button -->
-                <button
-                  @click="toggleFullScreen"
-                  class="px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 flex items-center"
-                  :aria-pressed="isFullScreen ? 'true' : 'false'"
-                  title="Toggle Fullscreen"
-                >
-                  <svg v-if="!isFullScreen" class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h6M4 4v6M20 20h-6M20 20v-6" />
-                  </svg>
-                  <svg v-else class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 4v6M20 4h-6M4 20v-6M4 20h6" />
-                  </svg>
-                  <span>{{ isFullScreen ? 'Exit Fullscreen' : 'Fullscreen' }}</span>
-                </button>
-              </div>
-              <div v-if="collaborationMode" class="flex items-center space-x-2">
-                <span class="text-xs text-gray-500">Active collaborators:</span>
-                <div v-for="user in activeUsers" :key="user.id" class="flex items-center">
-                  <span class="h-3 w-3 rounded-full mr-1" :style="{ backgroundColor: user.color }"></span>
-                  <span class="text-xs font-medium">{{ user.name }}</span>
-                </div>
               </div>
             </div>
-
-            <!-- Map Container -->
-            <div :id="'boundary-map-container'" :class="{ 'fullscreen-map': isFullScreen }">
-              <div id="boundary-map" class="w-full h-[600px]"></div>
-              <button
-                v-if="isFullScreen"
-                @click="toggleFullScreen"
-                class="fixed top-4 right-4 z-[10000] bg-white border border-gray-300 rounded-full p-2 shadow-lg hover:bg-gray-100 focus:outline-none"
-                aria-label="Exit Fullscreen"
-              >
-                <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 4v6M20 4h-6M4 20v-6M4 20h6" />
-                </svg>
-              </button>
+            <div v-else class="flex flex-col items-center justify-center h-full text-gray-500">
+              <MapPinIcon class="h-10 w-10 mb-2 text-gray-300" />
+              <p>Select a field on the map to view analysis</p>
             </div>
-
-            <!-- Processing Status -->
-            <ProcessingStatus 
-              v-if="isProcessing"
-              :progress="processingProgress"
-              :estimatedTime="estimatedTime"
-            />
-          </div>
-
-          <!-- Detection History -->
-          <div class="mt-6 bg-white rounded-lg shadow overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
-              <h3 class="text-sm font-medium text-gray-900">Detection History</h3>
-            </div>
-            <BoundaryHistory :history="detectionHistory" />
           </div>
         </div>
       </div>
-    </main>
-
-    <!-- Tutorial Overlay -->
-    <TutorialOverlay 
-      v-if="showTutorial"
-      @close="showTutorial = false"
-    />
+    </div>
   </div>
 </template>
 
 <style>
-#boundary-map {
+.leaflet-container {
+  height: 100%;
+  width: 100%;
   z-index: 0;
 }
 
-.leaflet-draw-toolbar .leaflet-draw-draw-polygon {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233B82F6"><path d="M19 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 16H5V4h14v14z"/></svg>') !important;
-}
-
-.leaflet-draw-toolbar .leaflet-draw-edit-edit {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2310B981"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>') !important;
-}
-
-.leaflet-draw-toolbar .leaflet-draw-edit-remove {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23EF4444"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>') !important;
+.leaflet-container.fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 50 !important;
+  border-radius: 0 !important;
 }
 
 .fullscreen-map {
   position: fixed !important;
-  top: 0;
-  left: 0;
+  top: 0 !important;
+  left: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
-  z-index: 9999;
+  z-index: 50 !important;
   background: #fff;
-  border-radius: 0 !important;
-  box-shadow: none !important;
 }
-.fullscreen-map #boundary-map {
-  width: 100vw !important;
-  height: 100vh !important;
-  min-height: 100vh !important;
+
+body.fullscreen-active {
+  overflow: hidden;
+}
+
+.leaflet-draw-toolbar a {
+  background-image: none !important;
+  background-color: #10b981 !important;
+  color: white !important;
+  border-radius: 4px !important;
+  margin: 2px !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .md\\:w-80 {
+    width: 100%;
+    max-height: 50vh;
+  }
 }
 </style>

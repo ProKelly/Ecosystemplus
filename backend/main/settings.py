@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
+
+import os
+GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal311.dll"  # Update this path to your GDAL DLL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,12 +36,25 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
+    'django.contrib.gis',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'base',
+
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_gis',
 ]
+
+# LEAFLET_CONFIG = {
+#     'DEFAULT_CENTER': (0, 0),  # Default center of the map
+#     'DEFAULT_ZOOM': 2,         # Default zoom level
+#     'TILES': 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+#     'ATTRIBUTION_PREFIX': 'Ecosystem+',
+# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -50,6 +67,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'main.urls'
+AUTH_USER_MODEL = 'base.User'
 
 TEMPLATES = [
     {
@@ -74,8 +92,12 @@ WSGI_APPLICATION = 'main.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'ecosystemplus',
+        'USER': 'postgres',
+        'PASSWORD': 'prince@2025',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
 
@@ -120,3 +142,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
+# SIMPLE_JWT = {
+#     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+#     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+#     "ROTATE_REFRESH_TOKENS": True,
+#     "BLACKLIST_AFTER_ROTATION": True,
+#     "AUTH_HEADER_TYPES": ("Bearer",),
+# }
