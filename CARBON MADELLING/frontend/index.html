@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🌿 Carbon Modelling – Ecosystem Plus</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+      /* ---------- Global Theme ---------- */
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(120deg, #e8f6ed 0%, #c4f4de 30%, #e8f6ed 70%, #d4f1e0 100%);
+        background-size: 400% 400%;
+        animation: bgShift 25s ease infinite;
+        min-height: 100vh;
+      }
+      @keyframes bgShift {
+        0%   { background-position: 0% 50%; }
+        50%  { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      /* Custom reusable keyframes referenced by Tailwind arbitrary animations */
+      @keyframes floatIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes pulseGradient {
+        0%   { background-position: 0% 50%; }
+        50%  { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      @keyframes sway {
+        0%,100% { transform: rotate(0deg); }
+        50%     { transform: rotate(1deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Vue mounts here -->
+    <div id="app" class="relative"></div>
+
+    <!-- Entry script compiled by Vite -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html> 
