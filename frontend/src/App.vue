@@ -1,9 +1,19 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { ref } from 'vue'
-import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { ref, computed } from 'vue'
+import { Bars3Icon, XMarkIcon, UserCircleIcon, ChevronDownIcon } from '@heroicons/vue/24/outline'
+import { useAuthStore } from '@/stores/auth'
 
 const mobileMenuOpen = ref(false)
+const userDropdownOpen = ref(false)
+const modulesDropdownOpen = ref(false)
+
+const authStore = useAuthStore()
+const isAuthenticated = computed(() => !!authStore.user)
+const userInitials = computed(() => {
+  if (!authStore.user) return ''
+  return `${authStore.user.first_name?.[0] || ''}${authStore.user.last_name?.[0] || ''}`
+})
 </script>
 
 <template>
@@ -20,34 +30,163 @@ const mobileMenuOpen = ref(false)
           </RouterLink>
 
           <!-- Desktop Navigation -->
-          <div class="hidden lg:flex items-center space-x-10 relative">
+          <div class="hidden lg:flex items-center space-x-8 relative">
             <!-- Modules Dropdown -->
             <div class="group relative">
-              <button class="flex items-center gap-1 text-base font-semibold text-gray-700 hover:text-emerald-600 transition-colors duration-200 px-2 py-1 focus:outline-none">
+              <button 
+                @click="modulesDropdownOpen = !modulesDropdownOpen"
+                class="flex items-center gap-1 text-base font-semibold text-gray-700 hover:text-emerald-600 transition-colors duration-200 px-2 py-1 focus:outline-none"
+              >
                 Modules
-                <svg class="h-4 w-4 ml-1 text-emerald-400 group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                <ChevronDownIcon 
+                  class="h-4 w-4 ml-1 text-emerald-400 transition-transform duration-200"
+                  :class="{ 'rotate-180': modulesDropdownOpen }"
+                />
               </button>
               <!-- Dropdown -->
-              <div class="absolute left-0 top-full mt-2 w-60 bg-white rounded-xl shadow-xl border border-green-100 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-30 py-2">
-                <RouterLink to="/field-detection" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Field Detection</RouterLink>
-                <RouterLink to="/classification" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Crop Classification</RouterLink>
-                <RouterLink to="/monitoring" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Crop Monitoring</RouterLink>
-                <RouterLink to="/forest-monitoring" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Forest Monitoring</RouterLink>
-                <RouterLink to="/soil-moisture" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Soil Analysis</RouterLink>
-                <RouterLink to="/yield-prediction" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Yield Prediction</RouterLink>
-                <RouterLink to="/carbon-model" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">Carbon Model</RouterLink>
-                <RouterLink to="/personalized-recommendations" class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold">A.I Recommendations</RouterLink>
+              <div 
+                v-show="modulesDropdownOpen"
+                @click.away="modulesDropdownOpen = false"
+                class="absolute left-0 top-full mt-2 w-60 bg-white rounded-xl shadow-xl border border-green-100 z-30 py-2"
+              >
+                <RouterLink 
+                  to="/field-detection" 
+                  class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold"
+                  @click="modulesDropdownOpen = false"
+                >
+                  Field Detection
+                </RouterLink>
+                <RouterLink 
+                  to="/classification" 
+                  class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold"
+                  @click="modulesDropdownOpen = false"
+                >
+                  Crop Classification
+                </RouterLink>
+                <RouterLink 
+                  to="/monitoring" 
+                  class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold"
+                  @click="modulesDropdownOpen = false"
+                >
+                  Crop Monitoring
+                </RouterLink>
+                <RouterLink 
+                  to="/forest-monitoring" 
+                  class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold"
+                  @click="modulesDropdownOpen = false"
+                >
+                  Forest Monitoring
+                </RouterLink>
+                <RouterLink 
+                  to="/soil-moisture" 
+                  class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold"
+                  @click="modulesDropdownOpen = false"
+                >
+                  Soil Analysis
+                </RouterLink>
+                <RouterLink 
+                  to="/yield-prediction" 
+                  class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold"
+                  @click="modulesDropdownOpen = false"
+                >
+                  Yield Prediction
+                </RouterLink>
+                <RouterLink 
+                  to="/carbon-model" 
+                  class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold"
+                  @click="modulesDropdownOpen = false"
+                >
+                  Carbon Model
+                </RouterLink>
+                <RouterLink 
+                  to="/personalized-recommendations" 
+                  class="block px-5 py-3 text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150 text-base font-semibold"
+                  @click="modulesDropdownOpen = false"
+                >
+                  A.I Recommendations
+                </RouterLink>
               </div>
             </div>
+            
             <!-- About Link -->
-            <RouterLink to="/about" class="text-base font-semibold text-gray-700 hover:text-emerald-600 transition-colors duration-200 px-2 py-1">About</RouterLink>
-            <!-- Dashboard Button -->
             <RouterLink 
-              to="/dashboard" 
-              class="ml-6 px-5 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-base font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
+              to="/about" 
+              class="text-base font-semibold text-gray-700 hover:text-emerald-600 transition-colors duration-200 px-2 py-1"
             >
-              Login
+              About
             </RouterLink>
+
+            <!-- Auth Buttons -->
+            <div v-if="!isAuthenticated" class="flex items-center space-x-4">
+              <RouterLink 
+                to="/login" 
+                class="text-base font-semibold text-gray-700 hover:text-emerald-600 transition-colors duration-200 px-2 py-1"
+              >
+                Sign In
+              </RouterLink>
+              <RouterLink 
+                to="/register" 
+                class="px-5 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-base font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all duration-200"
+              >
+                Get Started
+              </RouterLink>
+            </div>
+
+            <!-- User Profile Dropdown -->
+            <div v-else class="relative ml-4">
+              <button 
+                @click="userDropdownOpen = !userDropdownOpen"
+                class="flex items-center space-x-2 focus:outline-none"
+              >
+                <div v-if="authStore.user?.profile_image" class="h-9 w-9 rounded-full overflow-hidden">
+                  <img 
+                    :src="authStore.user.profile_image" 
+                    alt="User profile" 
+                    class="h-full w-full object-cover"
+                  >
+                </div>
+                <div v-else class="h-9 w-9 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <span v-if="userInitials" class="font-semibold text-emerald-700">
+                    {{ userInitials }}
+                  </span>
+                  <UserCircleIcon v-else class="h-7 w-7 text-emerald-600" />
+                </div>
+                <ChevronDownIcon 
+                  class="h-4 w-4 text-gray-500 transition-transform duration-200"
+                  :class="{ 'rotate-180': userDropdownOpen }"
+                />
+              </button>
+
+              <!-- User Dropdown Menu -->
+              <div 
+                v-show="userDropdownOpen"
+                @click.away="userDropdownOpen = false"
+                class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-green-100 z-30 py-1"
+              >
+                <div class="px-4 py-3 border-b border-gray-100">
+                  <p class="text-sm font-semibold text-gray-900">
+                    {{ authStore.user?.first_name }} {{ authStore.user?.last_name }}
+                  </p>
+                  <p class="text-sm text-gray-500 truncate">
+                    {{ authStore.user?.email }}
+                  </p>
+                </div>
+                <RouterLink 
+                  to="/profile" 
+                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150"
+                  @click="userDropdownOpen = false"
+                >
+                  Profile Settings
+                </RouterLink>
+                <div class="border-t border-gray-100"></div>
+                <button 
+                  @click="authStore.logout()"
+                  class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-red-600 transition-colors duration-150"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Mobile menu button -->
@@ -77,7 +216,7 @@ const mobileMenuOpen = ref(false)
                 { name: 'Soil Analysis', path: '/soil-moisture' },
                 { name: 'Yield Prediction', path: '/yield-prediction' },
                 { name: 'Carbon Model', path: '/carbon-model' },
-                {name: 'A.I Recommendations', path: '/personalized-recommendations'}
+                { name: 'A.I Recommendations', path: '/personalized-recommendations' }
               ]"
               :key="link.path"
               :to="link.path"
@@ -87,20 +226,48 @@ const mobileMenuOpen = ref(false)
             >
               {{ link.name }}
             </RouterLink>
-            <!-- <RouterLink 
-              to="/personalized-recommendations" 
-              @click="mobileMenuOpen = false"
-              class="block mt-4 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-lg font-bold rounded-xl text-center shadow-md hover:scale-105 transition-transform duration-150"
-            >
-              Home
-            </RouterLink> -->
+
+            <!-- Mobile Auth Links -->
+            <div v-if="!isAuthenticated" class="pt-2 space-y-3 border-t border-gray-100 mt-3">
+              <RouterLink 
+                to="/login" 
+                @click="mobileMenuOpen = false"
+                class="block px-3 py-2 rounded-lg text-lg font-semibold text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150"
+              >
+                Sign In
+              </RouterLink>
+              <RouterLink 
+                to="/register" 
+                @click="mobileMenuOpen = false"
+                class="block px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-lg font-bold rounded-xl text-center shadow-md hover:scale-105 transition-transform duration-150"
+              >
+                Get Started
+              </RouterLink>
+            </div>
+
+            <!-- Mobile User Links -->
+            <div v-else class="pt-2 space-y-3 border-t border-gray-100 mt-3">
+              <RouterLink 
+                to="/profile" 
+                @click="mobileMenuOpen = false"
+                class="block px-3 py-2 rounded-lg text-lg font-semibold text-gray-700 hover:bg-green-50 hover:text-emerald-600 transition-colors duration-150"
+              >
+                Profile Settings
+              </RouterLink>
+              <button 
+                @click="authStore.logout(); mobileMenuOpen = false"
+                class="block w-full text-left px-3 py-2 rounded-lg text-lg font-semibold text-gray-700 hover:bg-green-50 hover:text-red-600 transition-colors duration-150"
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         </transition>
       </nav>
     </header>
 
     <!-- Main Content -->
-    <main>
+    <main class="pt-16">
       <RouterView />
 
       <!-- Floating Chatbot Button -->
@@ -110,7 +277,6 @@ const mobileMenuOpen = ref(false)
         class="fixed z-50 bottom-6 right-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg flex items-center justify-center w-16 h-16 transition-colors border-4 border-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
         aria-label="Open Chatbot"
       >
-        <!-- prbot.svg icon -->
         <svg fill="#fff" height="40" width="40" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <g id="assistant">
             <g>
@@ -180,7 +346,7 @@ html {
   position: relative;
 }
 
-.router-link-active:not(.dashboard-link):not(.group)::-after {
+.router-link-active:not(.dashboard-link):not(.group)::after {
   content: '';
   position: absolute;
   bottom: -8px;
@@ -200,5 +366,17 @@ html {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Dropdown animations */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s ease;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>

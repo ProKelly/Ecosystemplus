@@ -11,11 +11,20 @@ class FarmViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        community_uuid = self.request.query_params.get('community')
         user = self.request.user
+        print(f"[DEBUG] community_uuid param: {community_uuid}, user: {user}, user.role: {getattr(user, 'role', None)}")
+        if community_uuid:
+            qs = Farm.objects.filter(community__uuid=community_uuid)
+            print(f"[DEBUG] Farms for community {community_uuid}: {[f.uuid for f in qs]}")
+            return qs
         if user.role == 'community':
-            # Community admin: see all farms in their community
-            return Farm.objects.filter(community=user.administered_community)
-        return Farm.objects.filter(owner=user)
+            qs = Farm.objects.filter(community=user.administered_community)
+            print(f"[DEBUG] Farms for community admin {user}: {[f.uuid for f in qs]}")
+            return qs
+        qs = Farm.objects.filter(owner=user)
+        print(f"[DEBUG] Farms for user {user}: {[f.uuid for f in qs]}")
+        return qs
 
     def perform_create(self, serializer):
         # Assign the farm to the currently logged-in user

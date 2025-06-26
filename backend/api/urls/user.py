@@ -6,7 +6,7 @@ from rest_framework_simplejwt.views import (
 )
 
 from api.views import (
-    UserRegistrationView, UserProfileView,
+    UserRegistrationView, UserProfileView, UserLoginView,
     CommunityViewSet, AdminAccessRequestViewSet,
     CustomTokenObtainPairView  # use this instead of default login
 )
@@ -18,6 +18,7 @@ router.register(r'admin-access-requests', AdminAccessRequestViewSet, basename='a
 urlpatterns = [
     # Auth
     path('auth/register/', UserRegistrationView.as_view(), name='user-register'),
+    path('auth/login/', UserLoginView.as_view(), name='user-login'),
     path('auth/token/', CustomTokenObtainPairView.as_view(), name='token-obtain-pair'),  # JWT login
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     path('auth/token/verify/', TokenVerifyView.as_view(), name='token-verify'),

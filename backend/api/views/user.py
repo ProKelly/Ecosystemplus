@@ -2,9 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions, viewsets
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.decorators import action
 from api.serializers import (
     UserRegistrationSerializer, UserLoginSerializer, UserSerializer,
-    CommunitySerializer, AdminAccessRequestSerializer, AdminAccessReviewSerializer
+    CommunitySerializer, AdminAccessRequestSerializer, AdminAccessReviewSerializer,
+    CustomTokenObtainPairSerializer
 )
 from base.models import User, Community, AdminAccessRequest
 
@@ -39,10 +41,9 @@ class UserLoginView(APIView):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     """
-    Custom JWT login view. You can set a custom serializer if needed.
+    Custom JWT login view using email instead of username.
     """
-    # serializer_class = YourCustomSerializer  # Uncomment and set if you want custom login logic
-    pass
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 # -------------------- CUSTOM PERMISSIONS -------------------- #
@@ -65,6 +66,18 @@ class CommunityViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(admin=self.request.user)
+
+    @action(detail=False, methods=['get'], url_path='my')
+    def my_community(self, request):
+        """
+        Returns the community for which the current user is the admin.
+        """
+        try:
+            community = Community.objects.get(admin=request.user)
+            serializer = self.get_serializer(community)
+            return Response(serializer.data)
+        except Community.DoesNotExist:
+            return Response({'detail': 'No community found for this admin.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 # -------------------- ADMIN ACCESS REQUEST VIEWSET -------------------- #
