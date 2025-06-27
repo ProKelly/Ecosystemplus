@@ -1,0 +1,25 @@
+# Core Django dependencies
+Django==5.2.3
+djangorestframework==3.16.0
+django-cors-headers==4.7.0
+
+# Database
+psycopg2-binary==2.9.10
+
+# Data processing
+pandas==2.3.0
+numpy==2.3.1
+openpyxl==3.1.5
+
+# API and web framework
+fastapi==0.115.13
+uvicorn==0.34.3
+requests==2.32.4
+
+# Code quality and formatting
+black==25.1.0
+flake8==7.3.0
+
+# Utilities
+python-dateutil==2.9.0.post0
+pytz==2025.2

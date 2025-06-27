@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcosystemPlus | Carbon Calculator - Cameroon</title>
+    
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Tailwind CSS with JIT -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js for beautiful visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    
+    <!-- Lucide Icons (Modern icon library) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Font: Inter (Modern, clean typography) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- AOS (Animate On Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9f0',
+                            100: '#dcf2dc',
+                            200: '#b8e4b8',
+                            300: '#8dd18d',
+                            400: '#5bb85b',
+                            500: '#4a7a2d',
+                            600: '#2d7a2d',
+                            700: '#1a5d1a',
+                            800: '#145214',
+                            900: '#0f3d0f',
+                        },
+                        secondary: {
+                            50: '#f7f9f4',
+                            100: '#eef4e8',
+                            200: '#dde9d1',
+                            300: '#c4d8b0',
+                            400: '#a3c285',
+                            500: '#5bb85b',
+                            600: '#4a7a2d',
+                            700: '#2d5016',
+                            800: '#254013',
+                            900: '#1d3210',
+                        },
+                        dark: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 3s infinite',
+                        'wiggle': 'wiggle 1s ease-in-out infinite',
+                        'gradient': 'gradient 15s ease infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'scale-in': 'scaleIn 0.3s ease-out',
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+                        'mesh-gradient': 'radial-gradient(at 40% 20%, hsla(28,100%,74%,1) 0px, transparent 50%), radial-gradient(at 80% 0%, hsla(189,100%,56%,1) 0px, transparent 50%), radial-gradient(at 0% 50%, hsla(355,100%,93%,1) 0px, transparent 50%), radial-gradient(at 80% 50%, hsla(340,100%,76%,1) 0px, transparent 50%), radial-gradient(at 0% 100%, hsla(22,100%,77%,1) 0px, transparent 50%), radial-gradient(at 80% 100%, hsla(242,100%,70%,1) 0px, transparent 50%), radial-gradient(at 0% 0%, hsla(343,100%,76%,1) 0px, transparent 50%)',
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+                        'glow': '0 0 20px rgba(26, 93, 26, 0.4)',
+                        'glow-lg': '0 0 40px rgba(26, 93, 26, 0.6)',
+                        'inner-glow': 'inset 0 2px 4px 0 rgba(26, 93, 26, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom CSS -->
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(1deg); }
+            50% { transform: translateY(-10px) rotate(-1deg); }
+            75% { transform: translateY(-15px) rotate(0.5deg); }
+        }
+        
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #4a7a2d, #2d7a2d, #1a5d1a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #4a7a2d 0%, #2d7a2d 50%, #1a5d1a 100%);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        .mesh-bg {
+            background: radial-gradient(at 40% 20%, rgba(74, 122, 45, 0.3) 0px, transparent 50%),
+                       radial-gradient(at 80% 0%, rgba(45, 122, 45, 0.2) 0px, transparent 50%),
+                       radial-gradient(at 0% 50%, rgba(26, 93, 26, 0.1) 0px, transparent 50%),
+                       radial-gradient(at 80% 50%, rgba(74, 122, 45, 0.2) 0px, transparent 50%);
+        }
+        
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4a7a2d, #2d7a2d);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(74, 122, 45, 0.4);
+        }
+        
+        .input-glow:focus {
+            box-shadow: 0 0 0 3px rgba(74, 122, 45, 0.1), 0 0 20px rgba(74, 122, 45, 0.2);
+        }
+        
+        .progress-ring {
+            transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .carbon-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.6) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s infinite linear;
+        }
+        
+        @media (max-width: 768px) {
+            .card-hover:hover {
+                transform: translateY(-4px) scale(1.01);
+            }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #4a7a2d, #2d7a2d);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #2d7a2d, #1a5d1a);
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body class="font-sans antialiased bg-gradient-to-br from-primary-50 via-white to-primary-100 min-h-screen overflow-x-hidden">
+    <div id="app" class="relative">
+        <!-- Background Elements -->
+        <div class="fixed inset-0 pointer-events-none">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-primary-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
+            <div class="absolute top-40 right-10 w-96 h-96 bg-secondary-200 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-float" style="animation-delay: 2s;"></div>
+            <div class="absolute -bottom-20 left-1/2 w-80 h-80 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style="animation-delay: 4s;"></div>
+        </div>
+        
+        <!-- Animated Header -->
+        <header class="relative z-10 gradient-bg text-white py-8 shadow-2xl" data-aos="fade-down">
+            <div class="carbon-particles">
+                <div v-for="n in 15" :key="n" class="particle" 
+                     :style="particleStyle(n)"></div>
+            </div>
+            
+            <div class="container mx-auto px-6">
+                <div class="flex flex-col lg:flex-row items-center justify-between">
+                    <div class="flex items-center space-x-4 mb-4 lg:mb-0" data-aos="fade-right">
+                        <div class="glass p-4 rounded-2xl">
+                            <i data-lucide="leaf" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-4xl lg:text-5xl font-black tracking-tight">
+                                EcosystemPlus
+                            </h1>
+                            <p class="text-lg lg:text-xl text-green-100 font-medium">
+                                Carbon Intelligence for Cameroon Farms
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-6" data-aos="fade-left">
+                        <div class="glass p-4 rounded-2xl text-center">
+                            <p class="text-sm opacity-90 mb-1">Current Season</p>
+                            <p class="font-bold text-lg flex items-center">
+                                <i :data-lucide="currentSeason === 'rainy' ? 'cloud-rain' : 'sun'" class="w-5 h-5 mr-2"></i>
+                                {{ currentSeason === 'rainy' ? 'Rainy' : 'Dry' }}
+                            </p>
+                        </div>
+                        <div class="glass p-4 rounded-2xl text-center">
+                            <p class="text-sm opacity-90 mb-1">Calculations</p>
+                            <p class="font-bold text-lg">{{ calculationCount }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="relative py-20 overflow-hidden">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-5xl lg:text-7xl font-black text-gray-900 mb-8 leading-tight" data-aos="zoom-in">
+                    Measure Your
+                    <span class="gradient-text block">Carbon Impact</span>
+                </h2>
+                <p class="text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto mb-12 leading-relaxed" data-aos="fade-up" data-aos-delay="200">
+                    Transform your farm into a carbon-smart operation with AI-powered insights, 
+                    real-time monitoring, and personalized sustainability recommendations.
+                </p>
+                
+                <!-- Feature Pills -->
+                <div class="flex flex-wrap justify-center gap-4 mb-12" data-aos="fade-up" data-aos-delay="400">
+                    <div class="glass-dark px-6 py-3 rounded-full text-gray-700 font-medium">
+                        <i data-lucide="zap" class="w-4 h-4 inline mr-2"></i>
+                        Real-time Analysis
+                    </div>
+                    <div class="glass-dark px-6 py-3 rounded-full text-gray-700 font-medium">
+                        <i data-lucide="brain" class="w-4 h-4 inline mr-2"></i>
+                        AI Recommendations
+                    </div>
+                    <div class="glass-dark px-6 py-3 rounded-full text-gray-700 font-medium">
+                        <i data-lucide="target" class="w-4 h-4 inline mr-2"></i>
+                        Precision Tracking
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Calculator -->
+        <section class="relative py-16">
+            <div class="container mx-auto px-6">
+                <div class="grid lg:grid-cols-3 gap-12">
+                    <!-- Calculator Form -->
+                    <div class="lg:col-span-2" data-aos="fade-right">
+                        <div class="glass-dark rounded-3xl p-8 lg:p-12 card-hover shadow-2xl border border-white/20">
+                            <div class="flex items-center mb-8">
+                                <div class="bg-gradient-to-r from-primary-500 to-primary-600 p-3 rounded-2xl mr-4">
+                                    <i data-lucide="calculator" class="w-8 h-8 text-white"></i>
+                                </div>
+                                <h3 class="text-3xl font-bold text-gray-900">
+                                    Carbon Calculator
+                                </h3>
+                            </div>
+                            
+                            <form @submit.prevent="calculateEmissions" class="space-y-8">
+                                <!-- Farm Area & Method -->
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                            <i data-lucide="map" class="w-4 h-4 inline mr-2"></i>
+                                            Farm Area (hectares)
+                                        </label>
+                                        <input 
+                                            v-model="formData.area_hectares"
+                                            type="number" 
+                                            min="0.1" 
+                                            step="0.1" 
+                                            required
+                                            class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:border-primary-500 focus:ring-0 input-glow transition-all text-lg font-medium bg-white/80 backdrop-blur-sm"
+                                            placeholder="e.g., 2.5"
+                                        >
+                                    </div>
+                                    
+                                    <div class="space-y-2">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                            <i data-lucide="settings" class="w-4 h-4 inline mr-2"></i>
+                                            How Do You Farm?
+                                        </label>
+                                        <div class="relative">
+                                            <input 
+                                                type="hidden" 
+                                                v-model="formData.farming_method"
+                                                required
+                                            >
+                                            <div class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl bg-white/80 backdrop-blur-sm cursor-pointer"
+                                                 :class="showMethodDescription ? 'border-primary-500' : 'hover:border-primary-300'"
+                                                 @click="showMethodDescription = !showMethodDescription">
+                                                <div class="flex items-center justify-between">
+                                                    <span class="text-lg font-medium" :class="formData.farming_method ? 'text-gray-900' : 'text-gray-500'">
+                                                        {{ formData.farming_method ? getSelectedMethodLabel(formData.farming_method) : 'Choose your farming style' }}
+                                                    </span>
+                                                    <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform" :class="showMethodDescription ? 'rotate-180' : ''"></i>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Enhanced Dropdown Panel -->
+                                            <div v-if="showMethodDescription" 
+                                                 class="absolute z-50 mt-2 p-4 bg-white rounded-xl shadow-2xl border border-gray-200 max-w-md"
+                                                 style="top: 100%; left: 0;">
+                                                <div class="space-y-3">
+                                                    <h6 class="font-bold text-gray-900 text-base mb-3 flex items-center">
+                                                        <i data-lucide="info" class="w-4 h-4 text-primary-600 mr-2"></i>
+                                                        Choose Your Farming Style
+                                                    </h6>
+                                                    
+                                                    <!-- Method Options -->
+                                                    <div class="space-y-2">
+                                                        <div v-for="method in farmingMethods" :key="method.value" 
+                                                             class="p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-gray-50"
+                                                             :class="formData.farming_method === method.value 
+                                                                ? 'border-primary-500 bg-primary-50' 
+                                                                : 'border-gray-200 hover:border-primary-300'"
+                                                             @click="selectFarmingMethod(method.value)">
+                                                            <div class="flex items-center justify-between">
+                                                                <div class="flex-1">
+                                                                    <h6 class="font-semibold text-gray-900 text-sm">{{ method.label }}</h6>
+                                                                    <p class="text-xs text-gray-600 mt-1">{{ getSimpleMethodDescription(method.value) }}</p>
+                                                                </div>
+                                                                <div class="text-right ml-3">
+                                                                    <div class="text-xs font-bold text-primary-600">{{ getMethodEmissionReduction(method.value) }}% less</div>
+                                                                    <div class="text-xs text-gray-500">{{ getMethodEmissionRange(method.value) }}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Selected Method Details -->
+                                                    <div v-if="formData.farming_method" class="mt-3 p-3 bg-primary-50 rounded-lg border border-primary-200">
+                                                        <h6 class="font-semibold text-primary-900 text-sm mb-2">
+                                                            {{ getSelectedMethodLabel(formData.farming_method) }}
+                                                        </h6>
+                                                        <p class="text-xs text-primary-800 leading-relaxed">
+                                                            {{ getSelectedMethodDescription(formData.farming_method) }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Fertilizer Level -->
+                                <div class="space-y-4">
+                                    <label class="block text-sm font-semibold text-gray-700">
+                                        <i data-lucide="beaker" class="w-4 h-4 inline mr-2"></i>
+                                        How Much Fertilizer Do You Use?
+                                    </label>
+                                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                        <div v-for="level in fertilizerLevels" :key="level.value" 
+                                             @click="formData.fertilizer_level = level.value"
+                                             class="relative cursor-pointer group">
+                                            <input 
+                                                type="radio" 
+                                                :value="level.value" 
+                                                v-model="formData.fertilizer_level"
+                                                class="sr-only"
+                                                required
+                                            >
+                                            <div class="p-4 border-2 rounded-2xl text-center transition-all card-hover"
+                                                 :class="formData.fertilizer_level === level.value 
+                                                    ? 'border-primary-500 bg-primary-50 shadow-glow' 
+                                                    : 'border-gray-200 bg-white/60 hover:border-primary-300'">
+                                                <div class="font-semibold text-gray-900">{{ level.label }}</div>
+                                            </div>
+                                            
+                                            <!-- Enhanced Hover Description Tooltip -->
+                                            <div class="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-white rounded-lg shadow-xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                                                 style="min-width: 220px;">
+                                                <div class="text-center">
+                                                    <h6 class="font-semibold text-gray-900 mb-1">{{ level.label }}</h6>
+                                                    <p class="text-xs text-gray-600 mb-2">{{ getFertilizerDescription(level.value) }}</p>
+                                                    <div class="text-xs font-bold text-primary-600">
+                                                        {{ getFertilizerEmissionRange(level.value) }}
+                                                    </div>
+                                                </div>
+                                                <!-- Arrow -->
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Fuel Consumption -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                        <i data-lucide="fuel" class="w-4 h-4 inline mr-2"></i>
+                                        Monthly Fuel Consumption (liters)
+                                    </label>
+                                    <input 
+                                        v-model="formData.monthly_fuel_liters"
+                                        type="number" 
+                                        min="0" 
+                                        step="0.1"
+                                        class="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:border-primary-500 focus:ring-0 input-glow transition-all text-lg font-medium bg-white/80 backdrop-blur-sm"
+                                        placeholder="e.g., 50"
+                                    >
+                                    <p class="text-sm text-gray-500 mt-2">
+                                        <i data-lucide="info" class="w-4 h-4 inline mr-1"></i>
+                                        Leave blank if no fuel-powered equipment is used
+                                    </p>
+                                </div>
+
+                                <!-- Livestock -->
+                                <div class="space-y-4">
+                                    <label class="block text-sm font-semibold text-gray-700">
+                                        <i data-lucide="cow" class="w-4 h-4 inline mr-2"></i>
+                                        Livestock (optional)
+                                    </label>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                        <div v-for="animal in livestockTypes" :key="animal" class="space-y-2 group relative">
+                                            <label class="block text-sm font-medium text-gray-600 capitalize">
+                                                {{ animal }}
+                                            </label>
+                                            <input 
+                                                v-model.number="formData.livestock[animal]"
+                                                type="number" 
+                                                min="0"
+                                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 input-glow transition-all font-medium bg-white/80 backdrop-blur-sm"
+                                                :placeholder="0"
+                                            >
+                                            
+                                            <!-- Hover Description Tooltip -->
+                                            <div class="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-white rounded-lg shadow-xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
+                                                 style="min-width: 180px;">
+                                                <div class="text-center">
+                                                    <h6 class="font-semibold text-gray-900 mb-1 capitalize">{{ animal }}</h6>
+                                                    <p class="text-xs text-gray-600">{{ getLivestockDescription(animal) }}</p>
+                                                </div>
+                                                <!-- Arrow -->
+                                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="pt-8">
+                                    <button 
+                                        type="submit" 
+                                        :disabled="loading"
+                                        class="w-full btn-primary text-white py-6 px-8 rounded-2xl font-bold text-xl shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed transform transition-all duration-300"
+                                    >
+                                        <span v-if="!loading" class="flex items-center justify-center">
+                                            <i data-lucide="zap" class="w-6 h-6 mr-3"></i>
+                                            Calculate Carbon Footprint
+                                        </span>
+                                        <span v-else class="flex items-center justify-center">
+                                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                                            Calculating...
+                                        </span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="space-y-8" data-aos="fade-left">
+                        <!-- Live Stats -->
+                        <div class="glass-dark rounded-3xl p-8 card-hover shadow-xl border border-white/20">
+                            <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                                <i data-lucide="activity" class="w-5 h-5 mr-3 text-primary-600"></i>
+                                Live Statistics
+                            </h4>
+                            
+                            <div class="space-y-6">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600">Current Season</span>
+                                    <span class="font-bold text-primary-600 flex items-center">
+                                        <i :data-lucide="currentSeason === 'rainy' ? 'cloud-rain' : 'sun'" class="w-4 h-4 mr-2"></i>
+                                        {{ currentSeason === 'rainy' ? 'Rainy' : 'Dry' }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600">Calculations Today</span>
+                                    <span class="font-bold text-gray-900">{{ calculationCount }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600">Avg. Emissions</span>
+                                    <span class="font-bold text-gray-900">2,340 kg CO₂e</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tips Card -->
+                        <div class="glass-dark rounded-3xl p-8 card-hover shadow-xl border border-white/20">
+                            <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                                <i data-lucide="lightbulb" class="w-5 h-5 mr-3 text-secondary-500"></i>
+                                Smart Tips
+                            </h4>
+                            
+                            <div class="space-y-4">
+                                <div v-for="(tip, index) in tips" :key="index" 
+                                     class="flex items-start space-x-3 p-3 rounded-xl bg-white/40 backdrop-blur-sm"
+                                     :data-aos="`fade-up`" :data-aos-delay="index * 100">
+                                    <i data-lucide="check-circle" class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0"></i>
+                                    <span class="text-gray-700 font-medium">{{ tip }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Methodology -->
+                        <div class="glass-dark rounded-3xl p-8 card-hover shadow-xl border border-white/20">
+                            <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                                <i data-lucide="shield-check" class="w-5 h-5 mr-3 text-blue-600"></i>
+                                Methodology
+                            </h4>
+                            
+                            <p class="text-gray-700 leading-relaxed">
+                                Our calculations use internationally recognized emission factors adapted 
+                                for Cameroon's agricultural conditions. Season detection is automatic 
+                                for maximum accuracy.
+                            </p>
+                            
+                            <div class="mt-4 flex items-center space-x-2 text-sm text-primary-600 font-medium">
+                                <i data-lucide="award" class="w-4 h-4"></i>
+                                <span>IPCC Guidelines Compliant</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section v-if="showResults" class="py-16 bg-gradient-to-r from-gray-50 to-white" data-aos="fade-up">
+            <div class="container mx-auto px-6">
+                <div class="glass-dark rounded-3xl p-8 lg:p-12 shadow-2xl border border-white/20">
+                    <div class="flex items-center mb-8">
+                        <div class="bg-gradient-to-r from-primary-500 to-primary-600 p-3 rounded-2xl mr-4">
+                            <i data-lucide="pie-chart" class="w-8 h-8 text-white"></i>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900">
+                            Your Carbon Footprint Report
+                        </h3>
+                    </div>
+
+                    <!-- Key Metrics -->
+                    <div class="grid md:grid-cols-4 gap-6 mb-12">
+                        <div v-for="(metric, key) in keyMetrics" :key="key" 
+                             class="text-center p-6 bg-white/60 backdrop-blur-sm rounded-2xl card-hover shadow-lg"
+                             :data-aos="'zoom-in'" :data-aos-delay="Object.keys(keyMetrics).indexOf(key) * 100">
+                            <div class="text-3xl font-black mb-2" :class="metric.color">
+                                {{ metric.value }}
+                            </div>
+                            <div class="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                                {{ metric.label }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts and Details -->
+                    <div class="space-y-8 mb-12">
+                        <!-- Emissions Breakdown Chart - Full Width -->
+                        <div class="flex justify-center items-center min-h-[400px] w-full" style="background: none;">
+                            <div style="width: 500px;">
+                                <h4 class="text-2xl font-bold text-center mb-4" style="color: #4a7a2d;">Monthly Carbon Emissions Breakdown</h4>
+                                <canvas v-show="chartLoaded" ref="emissionsChart" style="width: 500px; height: 350px; display: block; margin: 0 auto;"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations - Full Width -->
+                        <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg">
+                            <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                                <i data-lucide="target" class="w-5 h-5 mr-3 text-primary-600"></i>
+                                Recommendations
+                            </h4>
+                            
+                            <div class="space-y-4">
+                                <div v-for="(recommendation, index) in results.recommendations" :key="index"
+                                     class="flex items-start space-x-3 p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-primary-200 shadow-sm"
+                                     :data-aos="'fade-in-right'" :data-aos-delay="index * 200" :data-aos-duration="800">
+                                    <i data-lucide="arrow-right" class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0"></i>
+                                    <span class="text-gray-800 font-medium">{{ recommendation }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Breakdown Section -->
+                    <div class="grid lg:grid-cols-3 gap-8 mb-12">
+                        <!-- Fertilizer Emissions -->
+                        <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg" data-aos="fade-up" data-aos-delay="200">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-green-100 p-2 rounded-xl mr-3">
+                                    <i data-lucide="beaker" class="w-6 h-6 text-green-600"></i>
+                                </div>
+                                <h5 class="text-lg font-bold text-gray-900">Fertilizer Emissions</h5>
+                            </div>
+                            <div class="text-3xl font-black text-green-600 mb-2">
+                                {{ results.emissions.fertilizer_emissions.toFixed(1) }} kg
+                            </div>
+                            <div class="text-sm text-gray-600 mb-4">
+                                {{ ((results.emissions.fertilizer_emissions / results.emissions.total_emissions) * 100).toFixed(1) }}% of total
+                            </div>
+                            <div class="bg-green-50 p-3 rounded-lg">
+                                <p class="text-sm text-green-800">
+                                    <strong>Level:</strong> {{ results.farm_data.fertilizer_level.toUpperCase() }}<br>
+                                    <strong>Method:</strong> {{ results.farm_data.farming_method.replace('_', ' ').toUpperCase() }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Livestock Emissions -->
+                        <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg" data-aos="fade-up" data-aos-delay="300">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-yellow-100 p-2 rounded-xl mr-3">
+                                    <i data-lucide="heart" class="w-6 h-6 text-yellow-600"></i>
+                                </div>
+                                <h5 class="text-lg font-bold text-gray-900">Livestock Emissions</h5>
+                            </div>
+                            <div class="text-3xl font-black text-yellow-600 mb-2">
+                                {{ results.emissions.livestock_emissions.toFixed(1) }} kg
+                            </div>
+                            <div class="text-sm text-gray-600 mb-4">
+                                {{ ((results.emissions.livestock_emissions / results.emissions.total_emissions) * 100).toFixed(1) }}% of total
+                            </div>
+                            <div class="bg-yellow-50 p-3 rounded-lg">
+                                <p class="text-sm text-yellow-800">
+                                    <strong>Animals:</strong> {{ Object.values(results.farm_data.livestock).reduce((a, b) => a + b, 0) }} total<br>
+                                    <strong>Types:</strong> {{ Object.keys(results.farm_data.livestock).filter(k => results.farm_data.livestock[k] > 0).length }} different
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Fuel Emissions -->
+                        <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg" data-aos="fade-up" data-aos-delay="400">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-red-100 p-2 rounded-xl mr-3">
+                                    <i data-lucide="fuel" class="w-6 h-6 text-red-600"></i>
+                                </div>
+                                <h5 class="text-lg font-bold text-gray-900">Fuel Emissions</h5>
+                            </div>
+                            <div class="text-3xl font-black text-red-600 mb-2">
+                                {{ results.emissions.fuel_emissions.toFixed(1) }} kg
+                            </div>
+                            <div class="text-sm text-gray-600 mb-4">
+                                {{ ((results.emissions.fuel_emissions / results.emissions.total_emissions) * 100).toFixed(1) }}% of total
+                            </div>
+                            <div class="bg-red-50 p-3 rounded-lg">
+                                <p class="text-sm text-red-800">
+                                    <strong>Monthly:</strong> {{ results.farm_data.monthly_fuel_liters }} liters<br>
+                                    <strong>Annual:</strong> {{ (results.farm_data.monthly_fuel_liters * 12).toFixed(0) }} liters
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seasonal Insights & Comparison -->
+                    <div class="grid lg:grid-cols-2 gap-8 mb-12">
+                        <!-- Seasonal Insights -->
+                        <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg" data-aos="fade-right">
+                            <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                                <i data-lucide="calendar" class="w-6 h-6 mr-3 text-blue-600"></i>
+                                Seasonal Insights
+                            </h4>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-blue-50 rounded-xl">
+                                    <div>
+                                        <p class="font-semibold text-blue-900">Current Season</p>
+                                        <p class="text-sm text-blue-700">{{ results.farm_data.season === 'rainy' ? 'Wet Season (Mar-Oct)' : 'Dry Season (Nov-Feb)' }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <i :data-lucide="results.farm_data.season === 'rainy' ? 'cloud-rain' : 'sun'" class="w-8 h-8 text-blue-600"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="text-center p-4 bg-green-50 rounded-xl">
+                                        <p class="text-sm font-semibold text-green-800">Fertilizer Impact</p>
+                                        <p class="text-lg font-bold text-green-600">
+                                            {{ results.farm_data.season === 'rainy' ? '-20%' : '+20%' }}
+                                        </p>
+                                        <p class="text-xs text-green-700">
+                                            {{ results.farm_data.season === 'rainy' ? 'Natural cycling' : 'Increased need' }}
+                                        </p>
+                                    </div>
+                                    <div class="text-center p-4 bg-yellow-50 rounded-xl">
+                                        <p class="text-sm font-semibold text-yellow-800">Livestock Impact</p>
+                                        <p class="text-lg font-bold text-yellow-600">
+                                            {{ results.farm_data.season === 'rainy' ? '-10%' : '+10%' }}
+                                        </p>
+                                        <p class="text-xs text-yellow-700">
+                                            {{ results.farm_data.season === 'rainy' ? 'Better grazing' : 'Feed supplements' }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Farming Method Impact -->
+                        <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg" data-aos="fade-left">
+                            <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                                <i data-lucide="leaf" class="w-6 h-6 mr-3 text-green-600"></i>
+                                Farming Method Impact
+                            </h4>
+                            
+                            <div class="space-y-4">
+                                <div class="p-4 bg-green-50 rounded-xl border border-green-200">
+                                    <p class="font-semibold text-green-900 mb-2">Your Method: {{ results.farm_data.farming_method.replace('_', ' ').toUpperCase() }}</p>
+                                    <p class="text-sm text-green-800 mb-3">
+                                        {{ getSimpleMethodDescription(results.farm_data.farming_method) }}
+                                    </p>
+                                    <div class="flex items-center">
+                                        <div class="flex-1 bg-green-200 rounded-full h-2 mr-3">
+                                            <div class="bg-green-600 h-2 rounded-full" :style="{width: getFarmingMethodEfficiency(results.farm_data.farming_method) + '%'}"></div>
+                                        </div>
+                                        <span class="text-sm font-bold text-green-700">
+                                            {{ getFarmingMethodEfficiency(results.farm_data.farming_method) }}% efficiency
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div v-for="method in getAlternativeMethods(results.farm_data.farming_method)" :key="method.value"
+                                         class="p-3 bg-gray-50 rounded-lg text-center">
+                                        <p class="text-xs font-semibold text-gray-700">{{ method.label }}</p>
+                                        <p class="text-sm font-bold text-green-600">{{ method.reduction }}% reduction</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Educational Content -->
+                    <div class="bg-gradient-to-r from-gray-50 to-white rounded-2xl p-8 mb-12 border border-gray-200" data-aos="fade-up">
+                        <h4 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                            <i data-lucide="book-open" class="w-6 h-6 mr-3 text-primary-600"></i>
+                            Understanding Your Results
+                        </h4>
+                        
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="text-center">
+                                <div class="bg-white p-4 rounded-xl shadow-sm mb-3">
+                                    <i data-lucide="target" class="w-8 h-8 text-primary-600 mx-auto mb-2"></i>
+                                    <h6 class="font-bold text-gray-900">Carbon Intensity</h6>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    Your farm's emissions per hectare indicate how efficiently you're managing resources. 
+                                    <strong class="text-primary-600">{{ results.metrics.carbon_intensity.toUpperCase() }}</strong> intensity suggests 
+                                    {{ getIntensityDescription(results.metrics.carbon_intensity) }}.
+                                </p>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div class="bg-white p-4 rounded-xl shadow-sm mb-3">
+                                    <i data-lucide="trending-up" class="w-8 h-8 text-primary-600 mx-auto mb-2"></i>
+                                    <h6 class="font-bold text-gray-900">Improvement Potential</h6>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    Based on your current practices, you could potentially reduce emissions by 
+                                    <strong class="text-primary-600">{{ getImprovementPotential() }}%</strong> 
+                                    through sustainable farming methods.
+                                </p>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div class="bg-white p-4 rounded-xl shadow-sm mb-3">
+                                    <i data-lucide="award" class="w-8 h-8 text-green-600 mx-auto mb-2"></i>
+                                    <h6 class="font-bold text-gray-900">Environmental Impact</h6>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    Your current emissions are equivalent to 
+                                    <strong class="text-green-600">{{ getTreeEquivalent() }}</strong> 
+                                    trees needed to offset your carbon footprint annually.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <button @click="downloadReport" 
+                                class="flex-1 btn-primary text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-xl">
+                            <i data-lucide="download" class="w-5 h-5 mr-2 inline"></i>
+                            Download Report
+                        </button>
+                        <button @click="shareReport" 
+                                class="flex-1 bg-secondary-500 hover:bg-secondary-600 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-xl transition-all">
+                            <i data-lucide="share-2" class="w-5 h-5 mr-2 inline"></i>
+                            Share Results
+                        </button>
+                        <button @click="resetCalculator" 
+                                class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-xl transition-all">
+                            <i data-lucide="refresh-cw" class="w-5 h-5 mr-2 inline"></i>
+                            New Calculation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-16 mt-8">
+            <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-3 gap-12">
+                    <div>
+                        <h5 class="text-2xl font-bold mb-4 gradient-text">EcosystemPlus</h5>
+                        <p class="text-gray-400 leading-relaxed">
+                            Empowering Cameroon farmers with cutting-edge carbon intelligence 
+                            for a sustainable agricultural future.
+                        </p>
+                    </div>
+                    <div>
+                        <h6 class="text-lg font-semibold mb-4">Features</h6>
+                        <ul class="space-y-2 text-gray-400">
+                            <li>• Real-time Carbon Calculation</li>
+                            <li>• AI-Powered Recommendations</li>
+                            <li>• Seasonal Adaptation</li>
+                            <li>• IPCC Compliant Methodology</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h6 class="text-lg font-semibold mb-4">Contact</h6>
+                        <div class="space-y-2 text-gray-400">
+                            <p>📧 info@ecosystemplus.cm</p>
+                            <p>📱 +237 XXX XXX XXX</p>
+                            <p>📍 Yaoundé, Cameroon</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                    <p>&copy; 2025 EcosystemPlus. Revolutionizing sustainable agriculture in Cameroon.</p>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Loading Overlay -->
+        <div v-if="loading" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="glass text-center p-12 rounded-3xl shadow-2xl max-w-md mx-4">
+                <div class="animate-spin rounded-full h-16 w-16 border-4 border-primary-200 border-t-primary-600 mx-auto mb-6"></div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Analyzing Your Farm</h3>
+                <p class="text-gray-600">Calculating carbon footprint with precision...</p>
+                <div class="mt-6 bg-gray-200 rounded-full h-2">
+                    <div class="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full animate-pulse" :style="{width: loadingProgress + '%'}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue.js Application -->
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    loading: false,
+                    loadingProgress: 0,
+                    showResults: false,
+                    calculationCount: 1247,
+                    currentSeason: 'rainy',
+                    formData: {
+                        area_hectares: '',
+                        farming_method: '',
+                        fertilizer_level: '',
+                        monthly_fuel_liters: 0,
+                        livestock: {
+                            cattle: 0,
+                            goat: 0,
+                            sheep: 0,
+                            rams: 0,
+                            pigs: 0,
+                            poultry: 0
+                        }
+                    },
+                    farmingMethods: [
+                        { value: 'conventional', label: 'Traditional Farming' },
+                        { value: 'organic', label: 'Natural Farming' },
+                        { value: 'agroforestry', label: 'Tree + Crop Farming' },
+                        { value: 'conservation', label: 'Soil-Saving Farming' },
+                        { value: 'permaculture', label: 'Eco-Friendly Farming' }
+                    ],
+                    fertilizerLevels: [
+                        { value: 'none', label: 'None' },
+                        { value: 'low', label: 'Low' },
+                        { value: 'medium', label: 'Medium' },
+                        { value: 'high', label: 'High' }
+                    ],
+                    livestockTypes: ['cattle', 'goat', 'sheep', 'rams', 'pigs', 'poultry'],
+                    tips: [
+                        'Use organic fertilizers when possible',
+                        'Practice rotational grazing for livestock',
+                        'Plant trees around your farm boundaries',
+                        'Implement water conservation techniques',
+                        'Consider agroforestry for carbon sequestration'
+                    ],
+                    results: null,
+                    emissionsChart: null,
+                    chartLoaded: false,
+                    showMethodDescription: false
+                }
+            },
+            computed: {
+                keyMetrics() {
+                    if (!this.results) return {};
+                    
+                    return {
+                        total: {
+                            value: this.results.emissions.total_emissions.toFixed(1) + ' kg',
+                            label: 'Total CO₂e',
+                            color: 'text-primary-600'
+                        },
+                        perHectare: {
+                            value: this.results.metrics.emissions_per_hectare.toFixed(1) + ' kg',
+                            label: 'Per Hectare',
+                            color: 'text-primary-600'
+                        },
+                        intensity: {
+                            value: this.results.metrics.carbon_intensity.toUpperCase(),
+                            label: 'Intensity',
+                            color: this.getIntensityColor(this.results.metrics.carbon_intensity)
+                        },
+                        season: {
+                            value: this.results.farm_data.season.toUpperCase(),
+                            label: 'Season',
+                            color: 'text-blue-600'
+                        }
+                    };
+                }
+            },
+            methods: {
+                async mounted() {
+                    // Initialize AOS
+                    AOS.init({
+                        duration: 1000,
+                        once: true,
+                        offset: 100
+                    });
+                    
+                    // Initialize Lucide icons
+                    lucide.createIcons();
+                    
+                    // Add click outside handler
+                    document.addEventListener('click', this.handleClickOutside);
+                    
+                    // Get current season and form options
+                    await this.getFormOptions();
+                },
+                
+                async getFormOptions() {
+                    try {
+                        const response = await fetch('http://localhost:8000/api/carbon/form-options/');
+                        const data = await response.json();
+                        
+                        this.farmingMethods = data.farming_methods;
+                        this.fertilizerLevels = data.fertilizer_levels;
+                        this.livestockTypes = data.livestock_types;
+                        this.currentSeason = data.current_season;
+                    } catch (error) {
+                        console.error('Error fetching form options:', error);
+                    }
+                },
+                
+                async calculateEmissions() {
+                    // Validate required fields
+                    if (!this.formData.area_hectares || this.formData.area_hectares <= 0) {
+                        alert('Please enter a valid farm area (greater than 0 hectares).');
+                        return;
+                    }
+                    
+                    if (!this.formData.farming_method) {
+                        alert('Please select a farming method.');
+                        return;
+                    }
+                    
+                    if (!this.formData.fertilizer_level) {
+                        alert('Please select a fertilizer level.');
+                        return;
+                    }
+                    
+                    this.loading = true;
+                    this.loadingProgress = 0;
+                    
+                    // Simulate loading progress
+                    const progressInterval = setInterval(() => {
+                        if (this.loadingProgress < 90) {
+                            this.loadingProgress += Math.random() * 20;
+                        }
+                    }, 200);
+                    
+                    try {
+                        const response = await fetch('http://localhost:8000/api/carbon/calculate/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(this.formData)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            this.results = data.report;
+                            this.loadingProgress = 100;
+                            
+                            setTimeout(() => {
+                                this.loading = false;
+                                this.showResults = true;
+                                this.calculationCount++;
+                                this.$nextTick(() => {
+                                    this.createEmissionsChart();
+                                    AOS.refresh();
+                                });
+                            }, 500);
+                        } else {
+                            throw new Error(data.error || 'Calculation failed');
+                        }
+                    } catch (error) {
+                        console.error('Error calculating emissions:', error);
+                        alert('Error calculating emissions. Please try again.');
+                        this.loading = false;
+                    }
+                    
+                    clearInterval(progressInterval);
+                },
+                
+                createEmissionsChart() {
+                    this.chartLoaded = false;
+                    
+                    // Add a small delay to ensure DOM is ready
+                    setTimeout(() => {
+                        try {
+                            // Check if Chart.js is available
+                            if (typeof Chart === 'undefined') {
+                                console.error('Chart.js is not loaded');
+                                this.showChartFallback();
+                                return;
+                            }
+
+                            const canvas = this.$refs.emissionsChart;
+                            if (!canvas) {
+                                console.error('Canvas element not found');
+                                this.showChartFallback();
+                                return;
+                            }
+
+                            const ctx = canvas.getContext('2d');
+                            
+                            if (this.emissionsChart) {
+                                this.emissionsChart.destroy();
+                            }
+                            
+                            // Calculate percentages for better visualization
+                            const total = this.results.emissions.total_emissions;
+                            const fertilizerPercent = (this.results.emissions.fertilizer_emissions / total) * 100;
+                            const livestockPercent = (this.results.emissions.livestock_emissions / total) * 100;
+                            const fuelPercent = (this.results.emissions.fuel_emissions / total) * 100;
+                            
+                            this.emissionsChart = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: ['Fertilizer', 'Livestock', 'Fuel'],
+                                    datasets: [{
+                                        label: 'Emissions (kg CO₂e)',
+                                        data: [
+                                            this.results.emissions.fertilizer_emissions,
+                                            this.results.emissions.livestock_emissions,
+                                            this.results.emissions.fuel_emissions
+                                        ],
+                                        backgroundColor: [
+                                            'rgba(76,175,80,0.85)', // Vibrant green
+                                            'rgba(56,142,60,0.85)', // Deeper green
+                                            'rgba(139,195,74,0.85)' // Light green
+                                        ],
+                                        borderColor: [
+                                            '#388e3c',
+                                            '#2e7d32',
+                                            '#689f38'
+                                        ],
+                                        borderWidth: 2,
+                                        borderRadius: 18,
+                                        borderSkipped: false,
+                                        hoverBackgroundColor: [
+                                            'rgba(102,187,106,1)',
+                                            'rgba(76,175,80,1)',
+                                            'rgba(174,213,129,1)'
+                                        ],
+                                        hoverBorderColor: [
+                                            '#388e3c',
+                                            '#2e7d32',
+                                            '#689f38'
+                                        ],
+                                        hoverBorderWidth: 3,
+                                        // Custom bar shadow using plugin
+                                    }]
+                                },
+                                options: {
+                                    responsive: false,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: false },
+                                        title: {
+                                            display: true,
+                                            text: 'Monthly Carbon Emissions Breakdown',
+                                            color: '#388e3c',
+                                            font: { size: 22, weight: 'bold', family: 'Inter' },
+                                            padding: { top: 10, bottom: 20 }
+                                        },
+                                        tooltip: {
+                                            backgroundColor: 'rgba(56,142,60,0.95)',
+                                            titleColor: '#fff',
+                                            bodyColor: '#fff',
+                                            borderColor: '#388e3c',
+                                            borderWidth: 1,
+                                            cornerRadius: 8,
+                                            displayColors: true,
+                                            callbacks: {
+                                                title: function(context) { return context[0].label; },
+                                                label: function(context) {
+                                                    const value = context.parsed.y;
+                                                    return `Emissions: ${value.toFixed(1)} kg CO₂e`;
+                                                }
+                                            }
+                                        },
+                                        datalabels: {
+                                            anchor: 'end',
+                                            align: 'end',
+                                            color: '#388e3c',
+                                            font: { weight: 'bold', size: 14, family: 'Inter' },
+                                            formatter: function(value) { return value.toFixed(1) + ' kg'; }
+                                        }
+                                    },
+                                    layout: {
+                                        padding: { top: 20, right: 30, bottom: 20, left: 30 }
+                                    },
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            grid: {
+                                                color: 'rgba(56,142,60,0.08)',
+                                                drawBorder: false
+                                            },
+                                            ticks: {
+                                                color: '#388e3c',
+                                                font: { size: 16, weight: '600', family: 'Inter' },
+                                                callback: function(value) { return value.toFixed(0) + ' kg'; }
+                                            },
+                                            title: {
+                                                display: true,
+                                                text: 'CO₂e Emissions (kg)',
+                                                color: '#388e3c',
+                                                font: { size: 14, weight: 'bold', family: 'Inter' }
+                                            }
+                                        },
+                                        x: {
+                                            grid: { display: false },
+                                            ticks: {
+                                                color: '#388e3c',
+                                                font: { size: 18, weight: '600', family: 'Inter' }
+                                            }
+                                        }
+                                    },
+                                    animation: {
+                                        duration: 1200,
+                                        easing: 'easeOutQuart'
+                                    }
+                                },
+                                plugins: [
+                                    {
+                                        id: 'barShadow',
+                                        beforeDraw: function(chart) {
+                                            const ctx = chart.ctx;
+                                            chart.data.datasets.forEach((dataset, i) => {
+                                                const meta = chart.getDatasetMeta(i);
+                                                meta.data.forEach(bar => {
+                                                    ctx.save();
+                                                    ctx.shadowColor = 'rgba(56,142,60,0.18)';
+                                                    ctx.shadowBlur = 16;
+                                                    ctx.shadowOffsetY = 6;
+                                                    ctx.fillRect(bar.x - bar.width/2, bar.y, bar.width, bar.base - bar.y);
+                                                    ctx.restore();
+                                                });
+                                            });
+                                        }
+                                    }
+                                ]
+                            });
+
+                            // Show chart and hide fallback
+                            this.chartLoaded = true;
+                            this.hideChartFallback();
+                            
+                        } catch (error) {
+                            console.error('Error creating chart:', error);
+                            this.showChartFallback();
+                        }
+                    }, 100); // 100ms delay
+                },
+
+                showChartFallback() {
+                    // Show a simple text-based breakdown instead of chart
+                    const chartContainer = this.$refs.emissionsChart?.parentElement;
+                    if (chartContainer) {
+                        const fallback = document.createElement('div');
+                        fallback.id = 'chartFallback';
+                        fallback.className = 'space-y-4';
+                        fallback.innerHTML = `
+                            <div class="text-center text-gray-600 mb-6">
+                                <i data-lucide="bar-chart-3" class="w-12 h-12 mx-auto mb-3 text-gray-400"></i>
+                                <p class="text-sm font-medium">Interactive chart unavailable</p>
+                                <p class="text-xs text-gray-500 mt-1">Showing detailed breakdown below</p>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200">
+                                    <div class="flex items-center">
+                                        <div class="w-4 h-4 bg-green-700 rounded-full mr-3 shadow-sm"></div>
+                                        <div>
+                                            <span class="font-semibold text-gray-800">Fertilizer Emissions</span>
+                                            <p class="text-xs text-gray-600 mt-1">Level: ${this.results.farm_data.fertilizer_level.toUpperCase()}</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-bold text-green-700 text-lg">${this.results.emissions.fertilizer_emissions.toFixed(1)} kg</div>
+                                        <div class="text-sm text-green-600 font-medium">${((this.results.emissions.fertilizer_emissions / this.results.emissions.total_emissions) * 100).toFixed(1)}% of total</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200">
+                                    <div class="flex items-center">
+                                        <div class="w-4 h-4 bg-green-800 rounded-full mr-3 shadow-sm"></div>
+                                        <div>
+                                            <span class="font-semibold text-gray-800">Livestock Emissions</span>
+                                            <p class="text-xs text-gray-600 mt-1">${Object.values(this.results.farm_data.livestock).reduce((a, b) => a + b, 0)} animals total</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-bold text-green-700 text-lg">${this.results.emissions.livestock_emissions.toFixed(1)} kg</div>
+                                        <div class="text-sm text-green-600 font-medium">${((this.results.emissions.livestock_emissions / this.results.emissions.total_emissions) * 100).toFixed(1)}% of total</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200">
+                                    <div class="flex items-center">
+                                        <div class="w-4 h-4 bg-green-900 rounded-full mr-3 shadow-sm"></div>
+                                        <div>
+                                            <span class="font-semibold text-gray-800">Fuel Emissions</span>
+                                            <p class="text-xs text-gray-600 mt-1">${this.results.farm_data.monthly_fuel_liters} liters/month</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-bold text-green-700 text-lg">${this.results.emissions.fuel_emissions.toFixed(1)} kg</div>
+                                        <div class="text-sm text-green-600 font-medium">${((this.results.emissions.fuel_emissions / this.results.emissions.total_emissions) * 100).toFixed(1)}% of total</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-green-50 rounded-xl border border-green-200">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-green-800">Total Monthly Emissions</span>
+                                    <span class="font-bold text-green-700 text-xl">${this.results.emissions.total_emissions.toFixed(1)} kg CO₂e</span>
+                                </div>
+                                <div class="mt-2 text-sm text-green-700">
+                                    <span class="font-medium">Intensity:</span> ${this.results.metrics.carbon_intensity.toUpperCase()} 
+                                    (${this.results.metrics.emissions_per_hectare.toFixed(1)} kg/ha)
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Hide the canvas and show fallback
+                        if (this.$refs.emissionsChart) {
+                            this.$refs.emissionsChart.style.display = 'none';
+                        }
+                        chartContainer.appendChild(fallback);
+                        
+                        // Reinitialize Lucide icons for the fallback
+                        lucide.createIcons();
+                    }
+                },
+
+                hideChartFallback() {
+                    const fallback = document.getElementById('chartFallback');
+                    if (fallback) {
+                        fallback.remove();
+                    }
+                    if (this.$refs.emissionsChart) {
+                        this.$refs.emissionsChart.style.display = 'block';
+                    }
+                },
+                
+                getIntensityColor(intensity) {
+                    const colors = {
+                        'low': 'text-green-600',
+                        'medium': 'text-yellow-600',
+                        'high': 'text-orange-600',
+                        'very_high': 'text-red-600'
+                    };
+                    return colors[intensity] || 'text-gray-600';
+                },
+                
+                particleStyle(n) {
+                    return {
+                        left: Math.random() * 100 + '%',
+                        top: Math.random() * 100 + '%',
+                        width: (Math.random() * 6 + 2) + 'px',
+                        height: (Math.random() * 6 + 2) + 'px',
+                        animationDelay: (Math.random() * 8) + 's',
+                        animationDuration: (Math.random() * 10 + 6) + 's'
+                    };
+                },
+                
+                downloadReport() {
+                    if (!this.results) {
+                        alert('No report to download. Please calculate your results first.');
+                        return;
+                    }
+                    const r = this.results;
+                    const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'a4' });
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    const pageHeight = doc.internal.pageSize.getHeight();
+                    let y = 0;
+
+                    // Clean green header bar
+                    doc.setFillColor(74, 122, 45);
+                    doc.rect(0, 0, pageWidth, 44, 'F');
+
+                    // Title
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(22);
+                    doc.setTextColor(255, 255, 255);
+                    doc.text('EcosystemPlus Carbon Footprint Report', pageWidth / 2, 30, { align: 'center' });
+                    doc.setFontSize(10);
+                    doc.text(`Date: ${new Date().toLocaleString()}`, pageWidth - 40, 38, { align: 'right' });
+
+                    // Divider
+                    y = 52;
+                    doc.setDrawColor(74, 122, 45);
+                    doc.setLineWidth(1.2);
+                    doc.line(40, y, pageWidth - 40, y);
+                    y += 24;
+
+                    // Section: Farm Details
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(16);
+                    doc.setTextColor(74, 122, 45);
+                    doc.text('Farm Details', 60, y);
+                    y += 18;
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(11);
+                    doc.setTextColor(40, 40, 40);
+                    doc.text(`Farm Area: ${r.farm_data.area_hectares} ha`, 60, y);
+                    y += 14;
+                    doc.text(`Farming: ${this.getSelectedMethodLabel(r.farm_data.farming_method)}`, 60, y);
+                    y += 14;
+                    doc.text(`Fertilizer: ${r.farm_data.fertilizer_level.toUpperCase()}`, 60, y);
+                    y += 14;
+                    doc.text(`Fuel: ${r.farm_data.monthly_fuel_liters} L/mo`, 60, y);
+                    y += 14;
+                    doc.text(`Livestock: ${Object.entries(r.farm_data.livestock).map(([k,v]) => `${k}: ${v}`).join(', ')}`, 60, y);
+                    y += 14;
+                    doc.text(`Season: ${r.farm_data.season}`, 60, y);
+                    y += 24;
+
+                    // Section: Key Metrics
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(16);
+                    doc.setTextColor(74, 122, 45);
+                    doc.text('Key Metrics', 60, y);
+                    y += 18;
+                    // Total badge
+                    doc.setFillColor(232, 245, 233);
+                    doc.roundedRect(60, y, 220, 32, 8, 8, 'F');
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(15);
+                    doc.setTextColor(34, 139, 34);
+                    doc.text(`Total: ${r.emissions.total_emissions} kg CO₂e`, 170, y + 22, { align: 'center' });
+                    y += 40;
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(11);
+                    doc.setTextColor(40, 40, 40);
+                    doc.text(`Per Hectare: ${r.metrics.emissions_per_hectare} kg/ha`, 60, y);
+                    y += 14;
+                    doc.text(`Intensity: ${r.metrics.carbon_intensity.toUpperCase()}`, 60, y);
+                    y += 24;
+
+                    // Divider
+                    doc.setDrawColor(200, 200, 200);
+                    doc.setLineWidth(0.8);
+                    doc.line(40, y, pageWidth - 40, y);
+                    y += 24;
+
+                    // Section: Emissions Breakdown
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(16);
+                    doc.setTextColor(74, 122, 45);
+                    doc.text('Emissions Breakdown', 60, y);
+                    y += 18;
+
+                    // Add chart image if available
+                    const chartCanvas = this.$refs.emissionsChart;
+                    if (chartCanvas) {
+                        try {
+                            const chartImg = chartCanvas.toDataURL('image/png', 1.0);
+                            doc.addImage(chartImg, 'PNG', 60, y, 400, 220);
+                            y += 230;
+                        } catch (e) {
+                            // fallback to text if image fails
+                            doc.setFont('helvetica', 'normal');
+                            doc.setFontSize(12);
+                            doc.setTextColor(40, 40, 40);
+                            doc.text(`Fertilizer: ${r.emissions.fertilizer_emissions} kg`, 80, y);
+                            y += 16;
+                            doc.text(`Livestock: ${r.emissions.livestock_emissions} kg`, 80, y);
+                            y += 16;
+                            doc.text(`Fuel: ${r.emissions.fuel_emissions} kg`, 80, y);
+                            y += 24;
+                        }
+                    } else {
+                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(12);
+                        doc.setTextColor(40, 40, 40);
+                        doc.text(`Fertilizer: ${r.emissions.fertilizer_emissions} kg`, 80, y);
+                        y += 16;
+                        doc.text(`Livestock: ${r.emissions.livestock_emissions} kg`, 80, y);
+                        y += 16;
+                        doc.text(`Fuel: ${r.emissions.fuel_emissions} kg`, 80, y);
+                        y += 24;
+                    }
+
+                    // Divider
+                    doc.setDrawColor(200, 200, 200);
+                    doc.line(40, y, pageWidth - 40, y);
+                    y += 24;
+
+                    // Section: Recommendations
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(16);
+                    doc.setTextColor(74, 122, 45);
+                    doc.text('Recommendations', 60, y);
+                    y += 18;
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(12);
+                    doc.setTextColor(40, 40, 40);
+                    (r.recommendations || []).forEach(rec => {
+                        doc.setFillColor(74, 122, 45);
+                        doc.circle(68, y - 4, 2, 'F');
+                        doc.text(rec, 80, y);
+                        y += 16;
+                        if (y > pageHeight - 80) { doc.addPage(); y = 60; }
+                    });
+                    y += 24;
+
+                    // Footer with contact info and green accent
+                    doc.setFillColor(74, 122, 45);
+                    doc.rect(0, pageHeight - 36, pageWidth, 36, 'F');
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(11);
+                    doc.setTextColor(255, 255, 255);
+                    doc.text('Thank you for using EcosystemPlus! | www.ecosystemplus.cm | info@ecosystemplus.cm', pageWidth / 2, pageHeight - 16, { align: 'center' });
+
+                    // Page number
+                    const pageCount = doc.internal.getNumberOfPages();
+                    for (let i = 1; i <= pageCount; i++) {
+                        doc.setPage(i);
+                        doc.setFontSize(9);
+                        doc.setTextColor(120, 120, 120);
+                        doc.text(`Page ${i} of ${pageCount}`, pageWidth - 60, pageHeight - 20);
+                    }
+
+                    doc.save('carbon_footprint_report.pdf');
+                },
+                
+                shareReport() {
+                    // Implementation for sharing report
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'My Carbon Footprint Report',
+                            text: `My farm produces ${this.results.emissions.total_emissions.toFixed(1)} kg CO₂e`,
+                            url: window.location.href
+                        });
+                    } else {
+                        alert('Share feature not supported on this device');
+                    }
+                },
+                
+                resetCalculator() {
+                    this.showResults = false;
+                    this.results = null;
+                    this.chartLoaded = false;
+                    this.formData = {
+                        area_hectares: '',
+                        farming_method: '',
+                        fertilizer_level: '',
+                        monthly_fuel_liters: 0,
+                        livestock: {
+                            cattle: 0,
+                            goat: 0,
+                            sheep: 0,
+                            rams: 0,
+                            pigs: 0,
+                            poultry: 0
+                        }
+                    };
+                    
+                    // Destroy chart if it exists
+                    if (this.emissionsChart) {
+                        this.emissionsChart.destroy();
+                        this.emissionsChart = null;
+                    }
+                    
+                    // Remove any fallback
+                    this.hideChartFallback();
+                    
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+                
+                getSimpleMethodDescription(method) {
+                    const descriptions = {
+                        'conventional': 'Uses chemical fertilizers and regular tilling',
+                        'organic': 'Uses natural compost and no chemicals',
+                        'agroforestry': 'Grows trees with your crops',
+                        'conservation': 'Minimal tilling to protect soil',
+                        'permaculture': 'Works with nature, not against it'
+                    };
+                    return descriptions[method] || 'Sustainable farming method';
+                },
+                
+                getFarmingMethodEfficiency(method) {
+                    const efficiencies = {
+                        'conventional': 70,
+                        'organic': 85,
+                        'agroforestry': 90,
+                        'conservation': 80,
+                        'permaculture': 95
+                    };
+                    return efficiencies[method] || 75;
+                },
+                
+                getAlternativeMethods(currentMethod) {
+                    const allMethods = [
+                        { value: 'conventional', label: 'Conventional', reduction: 0 },
+                        { value: 'organic', label: 'Organic', reduction: 30 },
+                        { value: 'agroforestry', label: 'Agroforestry', reduction: 20 },
+                        { value: 'conservation', label: 'Conservation', reduction: 15 },
+                        { value: 'permaculture', label: 'Permaculture', reduction: 25 }
+                    ];
+                    
+                    return allMethods.filter(method => method.value !== currentMethod).slice(0, 4);
+                },
+                
+                getIntensityDescription(intensity) {
+                    const descriptions = {
+                        'low': 'excellent resource management with minimal environmental impact',
+                        'medium': 'moderate efficiency with room for improvement',
+                        'high': 'significant resource usage requiring optimization',
+                        'very_high': 'high resource consumption needing immediate attention'
+                    };
+                    return descriptions[intensity] || 'moderate efficiency';
+                },
+                
+                getImprovementPotential() {
+                    if (!this.results) return 25;
+                    
+                    const currentMethod = this.results.farm_data.farming_method;
+                    const currentEfficiency = this.getFarmingMethodEfficiency(currentMethod);
+                    const maxEfficiency = 95; // permaculture efficiency
+                    
+                    return Math.round((maxEfficiency - currentEfficiency) / maxEfficiency * 100);
+                },
+                
+                getTreeEquivalent() {
+                    if (!this.results) return '0';
+                    
+                    // Average tree absorbs about 22kg CO2 per year
+                    const treesNeeded = Math.ceil(this.results.emissions.total_emissions * 12 / 22);
+                    
+                    if (treesNeeded < 10) {
+                        return treesNeeded + ' trees';
+                    } else if (treesNeeded < 100) {
+                        return Math.round(treesNeeded / 10) * 10 + ' trees';
+                    } else {
+                        return Math.round(treesNeeded / 100) * 100 + ' trees';
+                    }
+                },
+                
+                getSelectedMethodLabel(method) {
+                    const methodObj = this.farmingMethods.find(m => m.value === method);
+                    return methodObj ? methodObj.label : 'Unknown Method';
+                },
+                
+                getSelectedMethodDescription(method) {
+                    const descriptions = {
+                        'conventional': 'Traditional farming with chemical fertilizers, pesticides, and regular tilling. This method typically has higher emissions due to synthetic inputs and soil disturbance.',
+                        'organic': 'Natural farming using compost, animal manure, crop rotation, and biological pest control. Reduces emissions by avoiding synthetic chemicals and improving soil health.',
+                        'agroforestry': 'Integrating trees with crops and livestock. Trees provide shade, improve soil quality, and sequester carbon while maintaining agricultural productivity.',
+                        'conservation': 'Minimal tillage with cover crops and crop rotation. Reduces soil erosion, improves water retention, and lowers fuel consumption from reduced machinery use.',
+                        'permaculture': 'Designing farming systems that mimic natural ecosystems. Uses local resources efficiently, creates biodiversity, and minimizes waste while maximizing productivity.'
+                    };
+                    return descriptions[method] || 'Sustainable farming method that reduces environmental impact.';
+                },
+                
+                getFertilizerDescription(level) {
+                    const descriptions = {
+                        'none': 'No chemical fertilizer, only compost or manure.',
+                        'low': 'A little fertilizer, less than 1 bag per hectare per year.',
+                        'medium': 'Moderate fertilizer, about 1–2 bags per hectare per year.',
+                        'high': 'A lot of fertilizer, more than 2 bags per hectare per year.'
+                    };
+                    return descriptions[level] || 'Unknown fertilizer level';
+                },
+                
+                getLivestockDescription(animal) {
+                    const descriptions = {
+                        'cattle': 'Cattle produce methane through digestion (rumination). Each cow produces about 2200 kg CO₂e per year. Consider rotational grazing to reduce emissions.',
+                        'goat': 'Goats are smaller ruminants that produce methane. Each goat produces about 144 kg CO₂e per year. Good for brush control and milk production.',
+                        'sheep': 'Sheep are ruminants that produce methane through digestion. Each sheep produces about 160 kg CO₂e per year. Excellent for wool and meat production.',
+                        'rams': 'Rams are male sheep with similar emissions to ewes. Each ram produces about 160 kg CO₂e per year. Important for breeding programs.',
+                        'pigs': 'Pigs are omnivores that produce methane through digestion. Each pig produces about 350 kg CO₂e per year. Efficient feed converters.',
+                        'poultry': 'Poultry have lower emissions than larger animals. Each bird produces about 10 kg CO₂e per year. Excellent for eggs and meat with minimal environmental impact.'
+                    };
+                    return descriptions[animal] || 'Livestock animals contribute to farm emissions through feed production and digestion.';
+                },
+                
+                getMethodEmissionReduction(method) {
+                    const reductions = {
+                        'conventional': 0,
+                        'organic': 30,
+                        'agroforestry': 20,
+                        'conservation': 15,
+                        'permaculture': 25
+                    };
+                    return reductions[method] || 0;
+                },
+                
+                getMethodEmissionRange(method) {
+                    const ranges = {
+                        'conventional': '2,000-4,000 kg/ha',
+                        'organic': '1,400-2,800 kg/ha',
+                        'agroforestry': '1,600-3,200 kg/ha',
+                        'conservation': '1,700-3,400 kg/ha',
+                        'permaculture': '1,500-3,000 kg/ha'
+                    };
+                    return ranges[method] || '2,000-4,000 kg/ha';
+                },
+                selectFarmingMethod(method) {
+                    this.formData.farming_method = method;
+                    this.showMethodDescription = false;
+                },
+                
+                handleClickOutside(event) {
+                    const dropdown = event.target.closest('.relative');
+                    if (!dropdown) {
+                        this.showMethodDescription = false;
+                    }
+                },
+                getFertilizerEmissionRange(level) {
+                    const ranges = {
+                        'none': '0-500 kg/ha',
+                        'low': '500-1,000 kg/ha',
+                        'medium': '1,000-2,000 kg/ha',
+                        'high': '2,000-4,000 kg/ha'
+                    };
+                    return ranges[level] || '0-500 kg/ha';
+                }
+            },
+            
+            async mounted() {
+                // Initialize AOS
+                AOS.init({
+                    duration: 1000,
+                    once: true,
+                    offset: 100
+                });
+                
+                // Initialize Lucide icons
+                lucide.createIcons();
+                
+                // Add click outside handler
+                document.addEventListener('click', this.handleClickOutside);
+                
+                // Get form options
+                await this.getFormOptions();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

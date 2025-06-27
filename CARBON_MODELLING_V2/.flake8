@@ -1,0 +1,23 @@
+[flake8]
+max-line-length = 88
+extend-ignore = 
+    # E203: whitespace before ':'
+    E203,
+    # W503: line break before binary operator
+    W503,
+    # F401: module imported but unused (common in Django settings)
+    F401
+exclude = 
+    migrations,
+    __pycache__,
+    manage.py,
+    */settings/*.py,
+    */venv/*,
+    */env/*
+per-file-ignores = 
+    # Django settings files can have unused imports
+    */settings.py:F401,F403
+    # Django urls.py files often have unused imports  
+    */urls.py:F401
+    # __init__.py files can have unused imports
+    __init__.py:F401
